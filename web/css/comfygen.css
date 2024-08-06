@@ -1,82 +1,245 @@
-body {
-  background: #333;
-  color: #eee;
-  margin: 0;
-  padding: 0;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+  :root {
+    --bg-color: #333;
+    --text-color: #eee;
+    --primary-color: #3a86ff;
+    --secondary-color: #8338ec;
+    --accent-color: #ff006e;
+    --light-gray: #555;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--primary-color);
+    letter-spacing: -0.5px;
+  }
+
+  .card {
+    background-color: #444;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  #prompt-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #prompt {
+    width: 100%;
+    height: 80px;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    resize: vertical;
+    margin-bottom: 0.5rem;
+    background-color: #bbb;
+    color: #333;
+    outline: none;
+  }
+
+  .btn {
+    display: inline-block;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .btn-primary {
+    color: #fff;
+    background-color: var(--primary-color);
+  }
+
+  .btn-secondary {
+    color: var(--text-color);
+    background-color: var(--light-gray);
+  }
+
+  #clear-prompt-button {
+    align-self: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  #image-settings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-main {
+#image-settings > div {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
 }
 
-#prompt {
-  width: 90%;
-  max-width: 600px;
-  height: 5em;
-  margin-top: 20px;
-  padding: 0 10px;
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background-color: #bbb;
-  color: #333;
-  outline: none;
+#image-settings label {
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-color);
 }
 
-#send-prompt-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  background-color: #444;
-  color: #eee;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-}
-
-#send-prompt-button:active {
-  background-color: #555;
-  transform: scale(0.95);
-}
-
-#maingen {
-  margin-top: 20px;
-  width: 90%;
-  max-width: 600px;
-  height: 512px;
-  background: #111;
-  border-radius: 6px;
-}
-
-#main-progress {
-  position: absolute;
-  top: 0;
-  left: 0;
+#image-settings input,
+#image-settings select {
   width: 100%;
-  z-index: 3;
-  border-radius: 0;
-  height: 6px;
-  background-color: #607D8B;
-  border: 0;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--light-gray);
+  color: var(--text-color);
+  font-size: 0.9rem;
 }
 
-#main-progress::-moz-progress-bar {
-  background: #4CAF50;
+#image-settings input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
 }
 
-#main-progress::-webkit-progress-bar {
-  background: transparent;
+.checkbox-container {
+  display: flex;
+  align-items: center;
 }
 
-#main-progress::-webkit-progress-value {
-  background: #4CAF50;
+#current-seed {
+  font-size: 0.8rem;
+  color: var(--text-color);
+  margin-top: 0.25rem;
 }
 
-#main-progress::-moz-progress-bar,
-#main-progress::-webkit-progress-value {
-    transition: width 0.5s ease;
+#seed-input {
+  margin-top: 0.25rem;
 }
+
+  #send-prompt-button {
+    width: 100%;
+  }
+
+  #maingen {
+    width: 100%;
+    height: auto;
+    background: #111;
+    border-radius: 6px;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  #main-progress {
+    width: 100%;
+    height: 4px;
+    background-color: #607D8B;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    border: 0;
+  }
+
+  .image-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+
+  #image-counter {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  #prompt-history {
+    margin-top: 1rem;
+    background-color: #555;
+    border-radius: 4px;
+    padding: 0.5rem;
+  }
+
+  #prompt-history h3 {
+    color: #eee;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .prompt-item {
+    background-color: #666;
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+  }
+
+  .prompt-text {
+    flex-grow: 1;
+    margin-right: 0.5rem;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .favorite-button,
+  .remove-button {
+    background-color: transparent;
+    border: none;
+    color: #eee;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.25rem;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }

@@ -1,44 +1,5 @@
 {
-  "3": {
-    "inputs": {
-      "seed": 63423992056382,
-      "steps": 20,
-      "cfg": 8,
-      "sampler_name": "euler",
-      "scheduler": "normal",
-      "denoise": 1,
-      "model": [
-        "4",
-        0
-      ],
-      "positive": [
-        "6",
-        0
-      ],
-      "negative": [
-        "7",
-        0
-      ],
-      "latent_image": [
-        "5",
-        0
-      ]
-    },
-    "class_type": "KSampler",
-    "_meta": {
-      "title": "KSampler"
-    }
-  },
-  "4": {
-    "inputs": {
-      "ckpt_name": "sd_xl_base_1.0.safetensors"
-    },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "Load Checkpoint"
-    }
-  },
-  "5": {
+  "25": {
     "inputs": {
       "width": 512,
       "height": 512,
@@ -49,41 +10,15 @@
       "title": "Empty Latent Image"
     }
   },
-  "6": {
-    "inputs": {
-      "text": "",
-      "clip": [
-        "4",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "7": {
-    "inputs": {
-      "text": "text, watermark",
-      "clip": [
-        "4",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "8": {
+  "26": {
     "inputs": {
       "samples": [
-        "3",
+        "31",
         0
       ],
       "vae": [
-        "4",
-        2
+        "30",
+        0
       ]
     },
     "class_type": "VAEDecode",
@@ -91,17 +26,258 @@
       "title": "VAE Decode"
     }
   },
-  "9": {
+  "28": {
     "inputs": {
-      "filename_prefix": "ComfyUI",
-      "images": [
-        "8",
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "29": {
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "30": {
+    "inputs": {
+      "vae_name": "flux-schnell.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "31": {
+    "inputs": {
+      "noise": [
+        "34",
+        0
+      ],
+      "guider": [
+        "33",
+        0
+      ],
+      "sampler": [
+        "35",
+        0
+      ],
+      "sigmas": [
+        "32",
+        0
+      ],
+      "latent_image": [
+        "25",
         0
       ]
     },
-    "class_type": "SaveImage",
+    "class_type": "SamplerCustomAdvanced",
     "_meta": {
-      "title": "Save Image"
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "32": {
+    "inputs": {
+      "scheduler": "simple",
+      "steps": 4,
+      "denoise": 1,
+      "model": [
+        "29",
+        0
+      ]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "33": {
+    "inputs": {
+      "model": [
+        "29",
+        0
+      ],
+      "conditioning": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "34": {
+    "inputs": {
+      "noise_seed": 1000
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "35": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "38": {
+    "inputs": {
+      "guidance": 3.5,
+      "conditioning": [
+        "87",
+        2
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "55": {
+    "inputs": {
+      "sub_directory": [
+        "62",
+        0
+      ],
+      "filename_text_1": [
+        "87",
+        3
+      ],
+      "filename_text_2": "",
+      "filename_text_3": "",
+      "filename_separator": "_",
+      "timestamp": "true",
+      "counter_type": "none",
+      "filename_text_1_pos": 1,
+      "filename_text_2_pos": 2,
+      "filename_text_3_pos": 4,
+      "timestamp_pos": 0,
+      "timestamp_type": "save_time",
+      "counter_pos": 3,
+      "extra_metadata": "",
+      "images": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "Save Images Mikey",
+    "_meta": {
+      "title": "Save Images Mikey (Mikey)"
+    }
+  },
+  "60": {
+    "inputs": {
+      "text": "",
+      "seed": 216,
+      "autorefresh": "Yes"
+    },
+    "class_type": "DPCombinatorialGenerator",
+    "_meta": {
+      "title": "Combinatorial Prompts"
+    }
+  },
+  "61": {
+    "inputs": {
+      "text": [
+        "63",
+        0
+      ],
+      "clip": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "62": {
+    "inputs": {
+      "date": "false",
+      "date_directory": "true",
+      "custom_directory": "",
+      "custom_text": ""
+    },
+    "class_type": "FileNamePrefixDateDirFirst",
+    "_meta": {
+      "title": "File Name Prefix Date Dir First (Mikey)"
+    }
+  },
+  "63": {
+    "inputs": {
+      "text": [
+        "77",
+        0
+      ],
+      "seed": 115,
+      "autorefresh": "No"
+    },
+    "class_type": "DPRandomGenerator",
+    "_meta": {
+      "title": "Random Prompts"
+    }
+  },
+  "77": {
+    "inputs": {
+      "text1": "man",
+      "text2": "Text 2",
+      "text3": "Text 3",
+      "operation": "text1 to output1, text1 to output2, text1 to output3",
+      "delimiter": " ",
+      "use_seed": "true",
+      "seed": 115
+    },
+    "class_type": "TextCombinations3",
+    "_meta": {
+      "title": "Text Combinations 3 (Mikey)"
+    }
+  },
+  "78": {
+    "inputs": {
+      "images": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "87": {
+    "inputs": {
+      "wildcard_text": "man",
+      "populated_text": "man",
+      "mode": true,
+      "Select to add LoRA": "Select the LoRA to add to the text",
+      "Select to add Wildcard": "Select the Wildcard to add to the text",
+      "seed": 11,
+      "model": [
+        "29",
+        0
+      ],
+      "clip": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "ImpactWildcardEncode",
+    "_meta": {
+      "title": "ImpactWildcardEncode"
     }
   }
 }
