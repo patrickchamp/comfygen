@@ -28,6 +28,9 @@ export function initializeUIElements() {
         imageSizePreset: 'image-size-preset',
         stepsInput: 'steps',
         enableLoraCheckbox: 'enable-lora',
+        loraSelect: 'lora-select',
+        loraStrength: 'lora-strength',
+        loraStrengthValue: 'lora-strength-value',
         keepSeedCheckbox: 'keep-seed',
         seedInput: 'seed-input',
         currentSeedDisplaySpan: 'current-seed', // Added from seed_management needs
@@ -37,8 +40,6 @@ export function initializeUIElements() {
         modeImg2imgRadio: 'mode-img2img',
         imageUploadInput: 'image-upload-input',
         denoiseStrengthInput: 'denoise-strength',
-        denoisePresetSubtleButton: 'denoise-preset-subtle',
-        denoisePresetStrongButton: 'denoise-preset-strong',
         img2imgControls: 'img2img-controls',
         uploadedFilenameSpan: 'uploaded-filename',
 
@@ -62,8 +63,12 @@ export function initializeUIElements() {
         if (element) {
             elements[key] = element;
         } else {
-            console.error(`🚨 [UI Elements] Failed to find essential element with ID: ${elementIds[key]}`);
-            foundAll = false;
+            if (key !== 'loraStrengthValue') {
+                 console.error(`🚨 [UI Elements] Failed to find essential element with ID: ${elementIds[key]}`);
+                 foundAll = false;
+            } else {
+                 console.warn(`⚠️ [UI Elements] Non-essential element not found: ${elementIds[key]}`);
+            }
             elements[key] = null; // Explicitly set to null if not found
         }
     }
@@ -90,6 +95,9 @@ export const getImageHeightInputElement = () => elements.imageHeightInput;
 export const getImageSizePresetElement = () => elements.imageSizePreset;
 export const getStepsInputElement = () => elements.stepsInput;
 export const getEnableLoraCheckboxElement = () => elements.enableLoraCheckbox;
+export const getLoraSelectElement = () => elements.loraSelect;
+export const getLoraStrengthElement = () => elements.loraStrength;
+export const getLoraStrengthValueElement = () => elements.loraStrengthValue;
 export const getKeepSeedCheckboxElement = () => elements.keepSeedCheckbox;
 export const getSeedInputElement = () => elements.seedInput;
 export const getCurrentSeedDisplaySpanElement = () => elements.currentSeedDisplaySpan; // Added getter
@@ -99,8 +107,6 @@ export const getModeTxt2imgRadioElement = () => elements.modeTxt2imgRadio;
 export const getModeImg2imgRadioElement = () => elements.modeImg2imgRadio;
 export const getImageUploadInputElement = () => elements.imageUploadInput;
 export const getDenoiseStrengthElement = () => elements.denoiseStrengthInput;
-export const getDenoisePresetSubtleButtonElement = () => elements.denoisePresetSubtleButton;
-export const getDenoisePresetStrongButtonElement = () => elements.denoisePresetStrongButton;
 export const getImg2imgControlsElement = () => elements.img2imgControls;
 export const getUploadedFilenameSpanElement = () => elements.uploadedFilenameSpan;
 

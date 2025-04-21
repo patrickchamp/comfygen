@@ -21,12 +21,63 @@ import * as PromptManagement from './prompt_management.js';
 import * as ImageManagement from './image_management.js';
 import * as SeedManagement from './seed_management.js';
 import * as api from './api.js'; // Import api module for image upload
+import { fetchLoras } from './api.js';
+
+// Import new save functions
+import { saveSelectedLora, saveLoraStrength } from './settings_manager.js';
 
 // UI Element Getters (for event listeners & passing to modules)
 import * as UIElements from './ui_elements.js';
 
 // UI Control Functions (for event listeners)
 import * as PromptControlUI from './ui_prompt_controls.js';
+
+// ==========================================================================
+// Helper Functions
+// ==========================================================================
+
+/**
+ * Populates the LoRA select dropdown with options from the fetched list.
+ * Uses filename+extension (lora_name) for option value and cleaned name for display text.
+ */
+function populateLoraDropdown() {
+    const selectElement = UIElements.getLoraSelectElement();
+    if (!selectElement) {
+        console.warn("[App Init] LoRA select element not found, cannot populate.");
+        return;
+    }
+
+    // Clear existing options (except the first default one)
+    while (selectElement.options.length > 1) {
+        selectElement.remove(1);
+    }
+
+    // window.availableLoras now contains objects with name, path, relativePath, and lora_name
+    if (window.availableLoras && window.availableLoras.length > 0) {
+        let validOptionsCount = 0;
+        window.availableLoras.forEach(lora => {
+            // Use lora.lora_name (filename.ext) for the value, ensure it exists
+            if (lora && typeof lora.lora_name === 'string' && lora.lora_name.trim() !== '') {
+                const option = document.createElement('option');
+
+                // CRITICAL: Use the filename+extension for the option's value
+                option.value = lora.lora_name;
+
+                // Use the cleaned name (without path/extension) for display
+                option.textContent = lora.name || lora.lora_name; // Fallback display needed
+
+                selectElement.appendChild(option);
+                validOptionsCount++;
+            } else {
+                console.warn("[App Init] Skipping LoRA during population due to missing/invalid lora_name:", lora);
+            }
+        });
+        console.log(`[App Init] Populated LoRA dropdown with ${validOptionsCount} valid options.`);
+    } else {
+        console.log("[App Init] No available LoRAs found to populate dropdown.");
+        // selectElement.disabled = true;
+    }
+}
 
 // ==========================================================================
 // Initialization Function
@@ -40,7 +91,7 @@ import * as PromptControlUI from './ui_prompt_controls.js';
  * @param {function(Event): void} handleSocketMessageFunc - Reference to app.js function.
  * @param {function(): void} clearPromptFunc - Reference to app.js function.
  */
-export function initializeApp(queuePromptFunc, handleSocketMessageFunc, clearPromptFunc) {
+export async function initializeApp(queuePromptFunc, handleSocketMessageFunc, clearPromptFunc) {
     console.log("🚀 [App Init] Initializing ComfyGen Studio...");
 
     // 1. Initialize UI Element References (MUST be first)
@@ -51,6 +102,20 @@ export function initializeApp(queuePromptFunc, handleSocketMessageFunc, clearPro
         console.error("🚨 [App Init] CRITICAL: Failed to initialize UI elements.", error);
         alert("Fatal Error: Could not find essential UI elements. App cannot start.");
         return; // Stop initialization
+    }
+
+    // Fetch available LoRAs early
+    try {
+        window.availableLoras = await fetchLoras();
+        console.log(`  ✅ [App Init] Stored ${window.availableLoras.length} LoRAs in window.availableLoras.`);
+
+        // ---> Populate Dropdown BEFORE loading settings <---
+        populateLoraDropdown();
+
+    } catch (error) {
+        console.error("🚨 [App Init] Failed to fetch or store LoRAs during init.", error);
+        window.availableLoras = [];
+        populateLoraDropdown(); // Attempt population even on error (shows empty state)
     }
 
     // 2. Initialize Management Modules (passing necessary element getters/functions)
@@ -92,8 +157,8 @@ export function initializeApp(queuePromptFunc, handleSocketMessageFunc, clearPro
 
     // 5. Load Initial Settings & State (after UI elements are ready)
     try {
-        SettingsManager.loadInitialSettings(); // Uses SettingsManager logic now
-        PromptManagement.loadPromptsFromStorage(); // Load and display prompts
+        SettingsManager.loadInitialSettings();
+        PromptManagement.loadPromptsFromStorage();
         console.log("  ✅ [App Init] Initial settings and prompts loaded.");
     } catch (error) {
         console.error("⚠️ [App Init] Error loading settings or prompts:", error);
@@ -157,10 +222,37 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
         SettingsManager.saveSteps(e.target.value);
     });
 
-    // --- LoRA Control ---
+    // --- LoRA Control (Checkbox) ---
     UIElements.getEnableLoraCheckboxElement()?.addEventListener('change', (e) => {
-        SettingsManager.saveLoraPreference(e.target.checked); // Save boolean
+        SettingsManager.saveLoraPreference(e.target.checked);
     });
+
+    // ---> ADD NEW LoRA Listeners <---
+    // LoRA Selection Dropdown
+    UIElements.getLoraSelectElement()?.addEventListener('change', (e) => {
+        saveSelectedLora(e.target.value);
+        console.log(`💾 Selected LoRA saved: ${e.target.value}`);
+    });
+
+    // LoRA Strength Slider
+    const strengthSlider = UIElements.getLoraStrengthElement();
+    const strengthValueSpan = UIElements.getLoraStrengthValueElement();
+    if (strengthSlider && strengthValueSpan) {
+        strengthSlider.addEventListener('input', (e) => {
+            const strength = parseFloat(e.target.value).toFixed(2);
+            strengthValueSpan.textContent = strength;
+            // Also save the setting when the slider is moved
+            saveLoraStrength(strength);
+        });
+         // Optional: Save on 'change' too, if you want it saved only when mouse is released
+         /*
+         strengthSlider.addEventListener('change', (e) => {
+             saveLoraStrength(e.target.value);
+             console.log(`💾 LoRA strength saved: ${e.target.value}`);
+         });
+         */
+    }
+    // ---> END NEW LoRA Listeners <---
 
     // --- Seed Controls ---
     UIElements.getKeepSeedCheckboxElement()?.addEventListener('change', (e) => {
@@ -221,27 +313,7 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
     if (imageUploadInput && uploadedFilenameSpan) {
         imageUploadInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (!file) {
-                // Optionally clear preview if no file selected or selection cancelled
-                // const mainImageElement = UIElements.getMainImageElement();
-                // if (mainImageElement) mainImageElement.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='; // Reset to blank pixel
-                // uploadedFilenameSpan.textContent = 'No image uploaded';
-                // window.uploadedImageFilename = null;
-                return;
-            }
-            
-            // --- START: Add Image Preview Logic ---
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const mainImageElement = UIElements.getMainImageElement();
-                if (mainImageElement) {
-                    mainImageElement.src = event.target.result; // Set src to the Data URL
-                    mainImageElement.alt = `Preview: ${file.name}`; // Update alt text
-                    console.log(`🖼️ Displaying preview for: ${file.name}`);
-                }
-            }
-            reader.readAsDataURL(file);
-            // --- END: Add Image Preview Logic ---
+            if (!file) return;
             
             try {
                 // Show loading state
@@ -259,57 +331,13 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
             } catch (error) {
                 uploadedFilenameSpan.textContent = 'Upload failed';
                 console.error('Failed to upload image:', error);
-                // Optionally clear preview on upload failure?
-                // const mainImageElement = UIElements.getMainImageElement();
-                // if (mainImageElement) mainImageElement.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='; // Reset to blank pixel
             }
         });
     }
     
-    // Denoise strength input & Presets
+    // Denoise strength input
     const denoiseStrengthInput = UIElements.getDenoiseStrengthElement();
-    const subtlePresetBtn = UIElements.getDenoisePresetSubtleButtonElement();
-    const strongPresetBtn = UIElements.getDenoisePresetStrongButtonElement();
-
-    if (denoiseStrengthInput && subtlePresetBtn && strongPresetBtn) {
-        const updatePresetButtons = (activeValue) => {
-            subtlePresetBtn.classList.remove('active');
-            strongPresetBtn.classList.remove('active');
-            // Use a small tolerance for float comparison
-            if (Math.abs(activeValue - 0.50) < 0.01) {
-                subtlePresetBtn.classList.add('active');
-            } else if (Math.abs(activeValue - 0.85) < 0.01) {
-                strongPresetBtn.classList.add('active');
-            }
-        };
-
-        const updateDenoise = (value) => {
-            denoiseStrengthInput.value = value.toFixed(2); // Ensure 2 decimal places
-            // Trigger the change event listener below to save the setting
-            denoiseStrengthInput.dispatchEvent(new Event('change'));
-        };
-
-        subtlePresetBtn.addEventListener('click', () => {
-            updateDenoise(0.50);
-            updatePresetButtons(0.50); // Update immediately for visual feedback
-        });
-
-        strongPresetBtn.addEventListener('click', () => {
-            updateDenoise(0.85);
-            updatePresetButtons(0.85); // Update immediately for visual feedback
-        });
-
-        // Existing listener for manual changes
-        denoiseStrengthInput.addEventListener('change', (e) => {
-            const currentValue = parseFloat(e.target.value);
-            SettingsManager.saveDenoiseStrength(currentValue);
-            updatePresetButtons(currentValue); // Deselect presets if value doesn't match
-        });
-
-        // Initial button state update based on current value
-        updatePresetButtons(parseFloat(denoiseStrengthInput.value));
-    } else if (denoiseStrengthInput) {
-        // Fallback to original behavior if preset buttons aren't available
+    if (denoiseStrengthInput) {
         denoiseStrengthInput.addEventListener('change', (e) => {
             SettingsManager.saveDenoiseStrength(e.target.value);
         });

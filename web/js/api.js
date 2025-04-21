@@ -137,4 +137,99 @@ export async function uploadImage(file) {
     }
 }
 
+/**
+ * Fetches the list of available LoRAs from the backend API.
+ * @returns {Promise<Array<object>>} A promise that resolves with an array of LoRA objects (each containing at least a 'name' property), or an empty array on error.
+ */
+export async function fetchLoras() {
+    const refreshEndpoint = '/comfyapi/v1/refresh-loras'; // Keep refresh attempt
+    const fetchEndpoint = '/comfyapi/v1/loras';
+
+    try {
+        // Try refreshing the backend list first
+        console.log(`[API Module] Attempting to refresh LoRA list via POST to: ${refreshEndpoint}`);
+        try {
+             await fetch(refreshEndpoint, { method: 'POST' });
+             console.log(`[API Module] Refresh request sent.`);
+        } catch (refreshError) {
+             console.warn(`[API Module] Failed to send refresh request to ${refreshEndpoint}:`, refreshError);
+        }
+
+        console.log(`[API Module] Fetching LoRA list from GET: ${fetchEndpoint}`);
+        const response = await fetch(fetchEndpoint);
+        if (!response.ok) {
+            let errorDetails = `HTTP status ${response.status}`;
+            try {
+                const errorData = await response.json();
+                errorDetails += `: ${JSON.stringify(errorData)}`;
+            } catch (e) {
+                errorDetails += ` - ${response.statusText}`;
+            }
+            throw new Error(`Failed to fetch LoRAs after refresh attempt. ${errorDetails}`);
+        }
+
+        const data = await response.json();
+        let loras = data && Array.isArray(data.loras) ? data.loras : (Array.isArray(data) ? data : []);
+
+        if (!Array.isArray(loras)) {
+             console.warn("[API Module] Fetched LoRA data is not an array:", data);
+             throw new Error("Invalid data format received for LoRAs.");
+        }
+
+        console.log(`[API Module] Received ${loras.length} LoRA objects from API. Processing paths...`);
+
+        // Process to add relativePath and ensure lora_name is filename+extension
+        const processedLoras = loras.map(lora => {
+            if (lora && typeof lora.path === 'string') {
+                let relativePath = '';
+                const normalizedPath = lora.path.replace(/\\/g, '/');
+                const keyword = 'models/loras/';
+                const index = normalizedPath.indexOf(keyword);
+
+                if (index !== -1) {
+                    // Extract the relative path (e.g., Flux/Jockstrap.safetensors)
+                    relativePath = normalizedPath.substring(index + keyword.length);
+                    lora.relativePath = relativePath;
+
+                    // Extract JUST the filename + extension (e.g., Jockstrap.safetensors)
+                    const lastSlashIndex = relativePath.lastIndexOf('/');
+                    if (lastSlashIndex !== -1) {
+                        lora.lora_name = relativePath.substring(lastSlashIndex + 1); // Use part after last slash
+                    } else {
+                        lora.lora_name = relativePath; // Use as is if no slash
+                    }
+                    // Ensure 'name' field (used for display) is cleaned without extension/path
+                    lora.name = lora.lora_name.replace(/\.(safetensors|ckpt|pt)$/i, '');
+
+                } else {
+                    console.warn(`[API Module] Could not find '${keyword}' in path for LoRA: ${lora.name} (Path: ${lora.path}). Using fallbacks.`);
+                    lora.relativePath = lora.path; // Best guess
+                    lora.lora_name = lora.path.substring(lora.path.replace(/\\/g, '/').lastIndexOf('/') + 1); // Filename fallback
+                    lora.name = (lora.name || lora.lora_name).replace(/\.(safetensors|ckpt|pt)$/i, ''); // Clean display name fallback
+                }
+            } else {
+                console.warn("[API Module] LoRA object missing 'path' property or path is not a string:", lora);
+                lora.relativePath = lora.name || '';
+                lora.lora_name = lora.name || ''; // Filename fallback
+                lora.name = (lora.name || '').replace(/\.(safetensors|ckpt|pt)$/i, ''); // Clean display name fallback
+            }
+            return lora;
+        }).filter(lora => lora.lora_name); // Keep only loras where we have a filename
+
+        console.log(`[API Module] Finished processing paths. Valid LoRAs with filename: ${processedLoras.length}`);
+        if (processedLoras.length > 0) {
+             console.log("[DEBUG] Processed first LoRA object:", JSON.stringify(processedLoras[0], null, 2));
+        }
+
+        return processedLoras;
+
+    } catch (error) {
+        console.error('[API Module] Error fetching or processing LoRAs:', error);
+        if (!error.message.includes("Failed to send refresh request")) {
+             alert(`Failed to fetch or process the list of LoRAs: ${error.message}`);
+         }
+        return [];
+    }
+}
+
 // Removed the deprecated updateWorkflow function

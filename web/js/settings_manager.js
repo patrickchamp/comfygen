@@ -15,6 +15,8 @@ const KEYS = {
     IMAGE_HEIGHT: 'imageHeight',
     STEPS: 'steps',
     ENABLE_LORA: 'enableLora',
+    SELECTED_LORA: 'selectedLora',
+    LORA_STRENGTH: 'loraStrength',
     SAVED_SEED: 'savedSeed', // Stores the seed value when "Keep Seed" is ON
     KEEP_SEED_PREF: 'keepSeedPreference', // Explicitly save checkbox state
     DENOISE_STRENGTH: 'denoiseStrength', // New key for img2img denoise strength
@@ -101,6 +103,36 @@ export function loadInitialSettings() {
         }
     }
 
+    // ---> Load LoRA Selection and Strength <---
+    const savedLora = localStorage.getItem(KEYS.SELECTED_LORA);
+    const savedStrength = localStorage.getItem(KEYS.LORA_STRENGTH);
+    const loraSelect = UIElements.getLoraSelectElement();
+    const loraStrengthInput = UIElements.getLoraStrengthElement();
+    const loraStrengthValueSpan = UIElements.getLoraStrengthValueElement();
+
+    if (loraSelect) {
+        // Note: Population happens first in app_init.js, so options should exist here.
+        // We only set the value if it was previously saved AND the option exists.
+        if (savedLora && [...loraSelect.options].some(opt => opt.value === savedLora)) {
+            loraSelect.value = savedLora;
+        } else {
+             loraSelect.value = ""; // Default to "Select LoRA"
+             // If a value was saved but isn't in the list anymore, remove the saved setting
+             if (savedLora) localStorage.removeItem(KEYS.SELECTED_LORA);
+        }
+    }
+
+    const initialStrength = savedStrength ? parseFloat(savedStrength) : 0.8;
+    if (loraStrengthInput) {
+        loraStrengthInput.value = initialStrength;
+    }
+    if (loraStrengthValueSpan) {
+        loraStrengthValueSpan.textContent = initialStrength.toFixed(2);
+    }
+     // Ensure default is saved if nothing was loaded
+    if (!savedStrength) saveSetting(KEYS.LORA_STRENGTH, initialStrength.toString());
+    // ---> END Load LoRA Selection and Strength <---
+
     // --- Load Seed State ---
     const keepSeedCheckbox = UIElements.getKeepSeedCheckboxElement();
     const seedInput = UIElements.getSeedInputElement();
@@ -178,6 +210,18 @@ export function saveSteps(steps) {
 export function saveLoraPreference(isEnabled) {
     saveSetting(KEYS.ENABLE_LORA, isEnabled); // Pass boolean, saveSetting handles conversion
 }
+
+// ---> ADD NEW LORA Save Handlers <---
+export function saveSelectedLora(loraName) {
+    saveSetting(KEYS.SELECTED_LORA, loraName);
+}
+
+export function saveLoraStrength(strength) {
+    // Ensure strength is saved as a string representation of a number
+    const strengthValue = typeof strength === 'number' ? strength.toString() : strength;
+    saveSetting(KEYS.LORA_STRENGTH, strengthValue);
+}
+// ---> END NEW LORA Save Handlers <---
 
 export function saveKeepSeedPreference(isChecked) {
     saveSetting(KEYS.KEEP_SEED_PREF, isChecked); // Pass boolean

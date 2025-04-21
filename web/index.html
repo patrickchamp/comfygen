@@ -46,10 +46,6 @@
                   </div>
                   <div class="settings__group">
                       <label for="denoise-strength" class="settings__label">Denoise Strength</label>
-                      <div class="settings__preset-group">
-                          <button type="button" id="denoise-preset-subtle" class="btn btn--secondary btn--preset">Subtle (0.50)</button>
-                          <button type="button" id="denoise-preset-strong" class="btn btn--secondary btn--preset">Strong (0.85)</button>
-                      </div>
                       <input type="number" id="denoise-strength" class="settings__input" min="0.0" max="1.0" step="0.05" value="0.75" aria-label="Denoise strength">
                   </div>
               </div>
@@ -86,6 +82,20 @@
                       <label for="enable-lora" class="settings__label">Use LoRA</label>
                   </div>
               </div>
+              <div class="settings__group settings__group--inline">
+                <div class="settings__subgroup" style="flex-grow: 2;"> <label for="lora-select" class="settings__label">LoRA Model</label>
+                    <select id="lora-select" class="settings__select" aria-label="Select LoRA Model">
+                        <option value="">-- Select LoRA --</option>
+                        </select>
+                </div>
+                <div class="settings__subgroup" style="flex-grow: 1;">
+                    <label for="lora-strength" class="settings__label">LoRA Strength</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="range" id="lora-strength" class="settings__slider" min="0" max="1" step="0.05" value="0.8" aria-label="LoRA strength" style="flex-grow: 1;">
+                        <span id="lora-strength-value" style="min-width: 3em; text-align: right;">0.80</span>
+                    </div>
+                </div>
+            </div>
               <div class="settings__group settings__group--inline">
                   <div class="settings__group settings__group--checkbox">
                       <input type="checkbox" id="keep-seed" class="settings__checkbox" />
