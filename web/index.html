@@ -13,19 +13,46 @@
 <body>
   <main class="main">
     <div class="container">
-      <!-- Header -->
-      <header class="header">
-        <h1 class="header__title">ComfyGen Studio</h1>
-      </header>
+      <!-- Image Display Card -->
+      <section class="card card--image fade-in" aria-labelledby="image-heading">
+        <img id="maingen" class="card__image" alt="Generated image will appear here" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" />
+        <div class="image-nav">
+          <button id="prev-image-button" class="btn btn--secondary" disabled aria-label="Show previous image">Prev</button>
+          <span id="image-counter" class="image-nav__counter" aria-live="polite">0 / 0</span>
+          <button id="next-image-button" class="btn btn--secondary" disabled aria-label="Show next image">Next</button>
+        </div>
+      </section>
+
+      <!-- Input Image Section -->
+      <details class="input-image-toggle">
+        <summary class="input-image-toggle__summary">Input Image</summary>
+        <div class="card card--input-image">
+          <div class="settings__group">
+              <label for="image-upload-input" class="settings__label">Upload Image</label>
+              <input type="file" id="image-upload-input" accept="image/*" class="settings__input">
+              <span id="uploaded-filename" class="settings__filename">No image uploaded</span>
+          </div>
+          <div class="settings__group settings__group--denoise">
+              <label class="settings__label">Variation Strength</label>
+              <div class="denoise-controls">
+                  <button id="vary-subtle-button" class="btn btn--secondary">Vary (Subtle)</button>
+                  <button id="vary-strong-button" class="btn btn--secondary">Vary (Strong)</button>
+                  <input type="number" id="denoise-strength-manual" class="settings__input denoise-input--manual" min="0.0" max="1.0" step="0.01" value="0.85" aria-label="Manual denoise strength">
+              </div>
+          </div>
+        </div>
+      </details>
 
       <!-- Prompt Input and Settings Card -->
       <section class="card card--prompt fade-in" aria-labelledby="prompt-heading">
           <div class="prompt__container">
               <label for="prompt" class="visually-hidden">Image Prompt</label>
               <textarea id="prompt" class="prompt__textarea" placeholder="Describe your image..." aria-label="Image prompt"></textarea>
-              <button id="clear-prompt-button" class="btn btn--secondary btn--clear-prompt" aria-label="Clear prompt text">Clear</button>
+              <div class="prompt__actions">
+                  <button id="clear-prompt-button" class="btn btn--secondary btn--clear-prompt" aria-label="Clear prompt text">Clear</button>
+                  <button id="send-prompt-button" class="btn btn--primary">Generate</button>
+              </div>
           </div>
-          <button id="send-prompt-button" class="btn btn--primary btn--full">Generate</button>
           <progress id="main-progress" class="progress" value="0" max="100" aria-label="Generation Progress"></progress>
           <details class="advanced-settings">
               <summary class="advanced-settings__summary">Advanced</summary>
@@ -93,36 +120,6 @@
               </fieldset>
           </details>
       </section>
-
-      <!-- Image Display Card -->
-      <section class="card card--image fade-in" aria-labelledby="image-heading">
-        <img id="maingen" class="card__image" alt="Generated image will appear here" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" />
-        <div class="image-nav">
-          <button id="prev-image-button" class="btn btn--secondary" disabled aria-label="Show previous image">Prev</button>
-          <span id="image-counter" class="image-nav__counter" aria-live="polite">0 / 0</span>
-          <button id="next-image-button" class="btn btn--secondary" disabled aria-label="Show next image">Next</button>
-        </div>
-      </section>
-
-      <!-- Input Image Section -->
-      <details class="input-image-toggle">
-        <summary class="input-image-toggle__summary">Input Image</summary>
-        <div class="card card--input-image">
-          <div class="settings__group">
-              <label for="image-upload-input" class="settings__label">Upload Image</label>
-              <input type="file" id="image-upload-input" accept="image/*" class="settings__input">
-              <span id="uploaded-filename" class="settings__filename">No image uploaded</span>
-          </div>
-          <div class="settings__group settings__group--denoise">
-              <label class="settings__label">Variation Strength</label>
-              <div class="denoise-controls">
-                  <button id="vary-subtle-button" class="btn btn--secondary">Vary (Subtle)</button>
-                  <button id="vary-strong-button" class="btn btn--secondary">Vary (Strong)</button>
-                  <input type="number" id="denoise-strength-manual" class="settings__input denoise-input--manual" min="0.0" max="1.0" step="0.01" value="0.85" aria-label="Manual denoise strength">
-              </div>
-          </div>
-        </div>
-      </details>
 
       <!-- Prompt History Section -->
       <details class="history-toggle">

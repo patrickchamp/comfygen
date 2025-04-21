@@ -214,20 +214,18 @@ body {
   Prompt Section
 -----------------------------*/
 /*
- * Styles for the prompt input area, including the textarea and clear button positioning.
+ * Styles for the prompt input area, including the textarea and action buttons.
  */
 .prompt__container {
   display: flex;
-  align-items: flex-start; /* Align clear button to top of textarea */
+  align-items: stretch;
   margin-bottom: var(--spacing-lg); /* Space below prompt area */
-  position: relative; /* Needed for absolute positioning of clear button */
 }
 
 .prompt__textarea {
   width: 100%;
   min-height: 100px; /* Minimum comfortable height */
   padding: var(--spacing-sm) var(--spacing-md);
-  padding-right: 80px; /* Make space for the absolutely positioned clear button */
   border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius-md);
   font-family: inherit;
@@ -246,11 +244,22 @@ body {
   box-shadow: 0 0 0 2px var(--input-focus-shadow-color);
 }
 
-/* Position the clear button inside the top-right corner of the container */
-.prompt__container .btn--clear-prompt {
-    position: absolute;
-    right: var(--spacing-sm);
-    top: var(--spacing-sm);
+/* New styles for the actions container */
+.prompt__actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  margin-left: var(--spacing-md);
+}
+
+/* Button styling within the actions container */
+.prompt__actions .btn {
+  width: 100%; /* Make buttons fill the vertical column */
+  margin-bottom: var(--spacing-sm); /* Add space below each button */
+}
+.prompt__actions .btn:last-child {
+  margin-bottom: 0; /* Remove margin from the last button */
 }
 
 /*----------------------------
