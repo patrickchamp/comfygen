@@ -218,7 +218,6 @@ body {
 .btn--clear-prompt {
   padding: 0.65rem 1.25rem; /* Match base .btn padding */
   font-size: 0.95rem; /* Match base .btn font-size */
-  margin-left: var(--spacing-sm); /* Space from textarea */
   flex-shrink: 0; /* Prevent shrinking if container is tight */
 }
 
@@ -260,8 +259,11 @@ body {
 .prompt__actions {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch; /* Ensure buttons stretch to full width */
   flex-shrink: 0;
   margin-left: var(--spacing-md);
+  margin-top: var(--spacing-sm); /* Add space above buttons */
 }
 
 /* Button styling within the actions container */
