@@ -29,7 +29,9 @@ const STORAGE_KEYS = {
     KEEP_SEED: 'keepSeed',
     SEED: 'seed',
     DENOISE_STRENGTH: 'denoiseStrength',
-    LAST_PROMPT: 'lastPrompt'
+    LAST_PROMPT: 'lastPrompt',
+    IMAGE_HISTORY: 'imageHistory',
+    CURRENT_IMAGE_INDEX: 'currentImageIndex'
 };
 
 // --- Settings Loading ---
