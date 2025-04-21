@@ -54,6 +54,10 @@ export function initializeUIElements() {
         // History
         recentPromptsList: 'recent-prompts-list',
         favoritePromptsList: 'favorite-prompts-list',
+
+        // Quality Mode
+        qualityModeFastRadio: 'quality-mode-fast',
+        qualityModeQualityRadio: 'quality-mode-quality',
     };
 
     let foundAll = true;
@@ -120,3 +124,7 @@ export const getImageCounterElement = () => elements.imageCounter;
 // History
 export const getRecentPromptsListElement = () => elements.recentPromptsList;
 export const getFavoritePromptsListElement = () => elements.favoritePromptsList;
+
+// Quality Mode Getters
+export const getQualityModeFastRadioElement = () => elements.qualityModeFastRadio;
+export const getQualityModeQualityRadioElement = () => elements.qualityModeQualityRadio;

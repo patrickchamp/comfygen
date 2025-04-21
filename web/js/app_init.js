@@ -24,7 +24,7 @@ import * as api from './api.js'; // Import api module for image upload
 import { fetchLoras } from './api.js';
 
 // Import new save functions
-import { saveLoraName, saveLoraStrength } from './settings_manager.js';
+import { saveLoraName, saveLoraStrength, saveQualityMode } from './settings_manager.js';
 
 // UI Element Getters (for event listeners & passing to modules)
 import * as UIElements from './ui_elements.js';
@@ -35,6 +35,58 @@ import * as PromptControlUI from './ui_prompt_controls.js';
 // ==========================================================================
 // Helper Functions
 // ==========================================================================
+
+/**
+ * Applies UI changes and saves settings based on the selected quality mode.
+ */
+function applyQualityModeSettings() {
+    const fastRadio = UIElements.getQualityModeFastRadioElement();
+    const qualityRadio = UIElements.getQualityModeQualityRadioElement();
+    const stepsInput = UIElements.getStepsInputElement();
+    // Get controls to enable/disable
+    const loraCheckbox = UIElements.getEnableLoraCheckboxElement();
+    const loraSelect = UIElements.getLoraSelectElement();
+    const loraStrengthSlider = UIElements.getLoraStrengthElement();
+
+    if (!fastRadio || !qualityRadio || !stepsInput || !loraCheckbox || !loraSelect || !loraStrengthSlider) {
+        console.warn("[App Init] Cannot apply quality mode settings: One or more UI elements missing.");
+        return;
+    }
+
+    let isFastMode = fastRadio.checked;
+    console.log(`[App Init] Applying Quality Mode UI adjustments: ${isFastMode ? 'Fast' : 'Quality'}`);
+
+    if (isFastMode) {
+        // Fast Mode Settings - Only update Steps UI and disable LoRA controls
+        stepsInput.value = 8;
+        // Disable standard LoRA controls
+        loraCheckbox.disabled = true;
+        loraSelect.disabled = true;
+        loraStrengthSlider.disabled = true;
+        // Add a visual cue (optional)
+        loraCheckbox.parentElement.style.opacity = '0.6';
+        loraSelect.parentElement.parentElement.style.opacity = '0.6'; // Target the group containing label+select
+        loraStrengthSlider.parentElement.parentElement.style.opacity = '0.6'; // Target the group containing label+slider+value
+
+    } else {
+        // Quality Mode Settings - Only update Steps UI and enable LoRA controls
+        stepsInput.value = 20;
+        // Enable standard LoRA controls
+        loraCheckbox.disabled = false;
+        loraSelect.disabled = false;
+        loraStrengthSlider.disabled = false;
+        // Remove visual cue (optional)
+        loraCheckbox.parentElement.style.opacity = '1';
+        loraSelect.parentElement.parentElement.style.opacity = '1';
+        loraStrengthSlider.parentElement.parentElement.style.opacity = '1';
+    }
+
+    // Save the steps setting that was changed by the mode selection
+    SettingsManager.saveSteps(stepsInput.value);
+    // DO NOT save LoRA preference or strength here anymore - they are user controlled when Quality mode is on.
+
+    console.log(`  -> Steps UI set to: ${stepsInput.value}. LoRA Controls ${isFastMode ? 'Disabled' : 'Enabled'}.`);
+}
 
 /**
  * Populates the LoRA select dropdown with options from the fetched list.
@@ -160,6 +212,10 @@ export async function initializeApp(queuePromptFunc, handleSocketMessageFunc, cl
         SettingsManager.loadInitialSettings();
         PromptManagement.loadPromptsFromStorage();
         console.log("  ✅ [App Init] Initial settings and prompts loaded.");
+        
+        // Apply quality mode settings based on loaded preference
+        applyQualityModeSettings();
+        console.log("  ✅ [App Init] Initial quality mode settings applied.");
     } catch (error) {
         console.error("⚠️ [App Init] Error loading settings or prompts:", error);
     }
@@ -198,23 +254,27 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
     // --- Image Size Controls ---
     UIElements.getImageSizePresetElement()?.addEventListener('change', (e) => {
         const selectedValue = e.target.value;
-        const widthInput = UIElements.getImageWidthInputElement();
-        const heightInput = UIElements.getImageHeightInputElement();
-        if (selectedValue && widthInput && heightInput) {
+        if (selectedValue) {
             const [width, height] = selectedValue.split('x').map(Number);
-            PromptControlUI.updateImageDimensionInputs(width, height); // Update UI fields
-            SettingsManager.saveDimensions(width, height); // Save using SettingsManager
+            UIElements.getImageWidthInputElement().value = width;
+            UIElements.getImageHeightInputElement().value = height;
+            SettingsManager.saveImageWidth(width);
+            SettingsManager.saveImageHeight(height);
         }
     });
-    UIElements.getImageWidthInputElement()?.addEventListener('change', (e) => {
-        const preset = UIElements.getImageSizePresetElement();
-        if (preset) preset.value = ''; // Clear preset dropdown
-        SettingsManager.saveDimensions(e.target.value, UIElements.getImageHeightInputElement()?.value);
+
+    // --- Quality Mode ---
+    UIElements.getQualityModeFastRadioElement()?.addEventListener('change', () => {
+        if (UIElements.getQualityModeFastRadioElement().checked) {
+            SettingsManager.saveQualityMode(); // Save 'fast'
+            applyQualityModeSettings(); // Apply settings
+        }
     });
-    UIElements.getImageHeightInputElement()?.addEventListener('change', (e) => {
-        const preset = UIElements.getImageSizePresetElement();
-        if (preset) preset.value = ''; // Clear preset dropdown
-        SettingsManager.saveDimensions(UIElements.getImageWidthInputElement()?.value, e.target.value);
+    UIElements.getQualityModeQualityRadioElement()?.addEventListener('change', () => {
+        if (UIElements.getQualityModeQualityRadioElement().checked) {
+            SettingsManager.saveQualityMode(); // Save 'quality'
+            applyQualityModeSettings(); // Apply settings
+        }
     });
 
     // --- Steps Control ---

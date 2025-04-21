@@ -269,60 +269,70 @@ async function queuePromptWithText(text) {
                 console.warn(`Node ${nodeIds.KSAMPLER} (KSampler) not found or missing 'steps' input.`);
             }
 
-            // ---> REVISED LoRA Handling Logic <---
+            // ---> FINAL LoRA Handling Logic (Fast Mode OR User Control in Quality Mode) <---
             const kSamplerNode = freshWorkflow[nodeIds.KSAMPLER];
             const loraNode = freshWorkflow[nodeIds.LORA_LOADER]; // Node ID '38' by default
             const checkpointNodeId = nodeIds.CHECKPOINT_LOADER; // Node ID '30' by default
             const loraNodeId = nodeIds.LORA_LOADER; // Node ID '38' by default
 
-            // Determine if we should apply the selected LoRA
-            const useDynamicLora = isLoraEnabledViaCheckbox && selectedLoraName !== "";
+            // Get Quality Mode state directly
+            const isFastMode = UIElements.getQualityModeFastRadioElement()?.checked ?? true; // Default to fast if element missing
 
-            console.log(`  💡 Applying Dynamic LoRA: ${useDynamicLora}`);
+            console.log(`[Workflow Gen] Processing LoRA. Quality Mode: ${isFastMode ? 'Fast' : 'Quality'}`);
 
             if (kSamplerNode?.inputs) {
-                if (loraNode) { // Check if the LoRA node exists in the workflow JSON
-                    if(loraNode.inputs) {
-                        // Always set the name from the dropdown
-                        loraNode.inputs.lora_name = selectedLoraName;
+                if (loraNode?.inputs) { // Check if the LoRA node and its inputs exist
 
-                        // Set strength based on checkbox and selection
-                        if (useDynamicLora) {
-                            loraNode.inputs.strength_model = parseFloat(selectedStrength);
-                            console.log(`     ✅ Setting LoRA: ${selectedLoraName}, Strength: ${selectedStrength}`);
-                        } else {
-                            loraNode.inputs.strength_model = 0; // Disable LoRA by setting strength to 0
-                            console.log(`     ℹ️ LoRA disabled (Checkbox OFF or No LoRA selected). Setting strength to 0 for node ${loraNodeId}.`);
-                        }
+                    // Ensure LoRA node is always connected to the checkpoint loader's model output first
+                    loraNode.inputs.model = [checkpointNodeId, 0];
 
-                        // Ensure LoRA node is always connected to the checkpoint loader
-                        loraNode.inputs.model = [checkpointNodeId, 0];
+                    if (isFastMode) {
+                        // --- Fast Mode: Apply Hyper LoRA, ignore UI ---
+                        const fastLoraFilename = "Hyper-FLUX.1-dev-8steps-lora.safetensors";
+                        const fastLoraStrength = 0.125;
 
-                    } else {
-                         console.warn(`LoRA Node ${loraNodeId} exists but missing 'inputs' structure.`);
-                         // Attempt to fallback? Or just warn? For now, just warn.
-                    }
+                        loraNode.inputs.lora_name = fastLoraFilename;
+                        loraNode.inputs.strength_model = fastLoraStrength;
 
-                    // Now, connect the KSampler appropriately
-                    if (useDynamicLora) {
-                        // Connect KSampler to the (now configured) LoRA Loader
+                        // Connect KSampler to the LoRA Node
                         kSamplerNode.inputs.model = [loraNodeId, 0];
+                        console.log(`     ✅ Fast Mode: Applying LoRA ${fastLoraFilename} with strength ${fastLoraStrength}.`);
                         console.log(`     ✅ KSampler (${nodeIds.KSAMPLER}) input connected to LoRA Loader (${loraNodeId}).`);
+
                     } else {
-                        // Connect KSampler directly to the Checkpoint Loader
-                        kSamplerNode.inputs.model = [checkpointNodeId, 0];
-                        console.log(`     ✅ KSampler (${nodeIds.KSAMPLER}) input connected directly to Checkpoint Loader (${checkpointNodeId}). LoRA node (${loraNodeId}) remains but is bypassed or strength is 0.`);
+                        // --- Quality Mode: Use standard UI LoRA controls ---
+                        // Read LoRA settings from the enabled UI controls
+                        const isLoraEnabledViaCheckbox = UIElements.getEnableLoraCheckboxElement()?.checked ?? false;
+                        const selectedLoraNameFromDropdown = UIElements.getLoraSelectElement() ? UIElements.getLoraSelectElement().value : "";
+                        const selectedStrengthFromSlider = parseFloat(UIElements.getLoraStrengthElement()?.value ?? "0.0");
+
+                        console.log(`     ℹ️ Quality Mode: Using UI LoRA settings. Checkbox: ${isLoraEnabledViaCheckbox}, Name: ${selectedLoraNameFromDropdown || "None"}, Strength: ${selectedStrengthFromSlider}`);
+
+                        // Set workflow LoRA node inputs based on UI
+                        loraNode.inputs.lora_name = selectedLoraNameFromDropdown;
+                        loraNode.inputs.strength_model = selectedStrengthFromSlider;
+
+                        // Connect KSampler conditionally based on UI state
+                        if (isLoraEnabledViaCheckbox && selectedLoraNameFromDropdown !== "" && selectedStrengthFromSlider > 0) {
+                            // Connect KSampler to the LoRA Node
+                            kSamplerNode.inputs.model = [loraNodeId, 0];
+                            console.log(`     ✅ KSampler (${nodeIds.KSAMPLER}) input connected to LoRA Loader (${loraNodeId}) via UI settings.`);
+                        } else {
+                            // Connect KSampler directly to the Checkpoint Loader (UI controls disable LoRA)
+                            kSamplerNode.inputs.model = [checkpointNodeId, 0];
+                            console.log(`     ✅ KSampler (${nodeIds.KSAMPLER}) input connected directly to Checkpoint Loader (${checkpointNodeId}). LoRA disabled via UI settings.`);
+                        }
                     }
 
                 } else {
-                    // LoRA node specified in NODE_IDS doesn't exist in the base workflow JSON
-                    console.warn(`LoRA Node (${loraNodeId}) not found in workflow! Cannot apply LoRA settings. Connecting KSampler directly to Checkpoint.`);
-                    kSamplerNode.inputs.model = [checkpointNodeId, 0];
+                    // LoRA node not found or missing inputs - connect directly to checkpoint
+                    console.warn(`LoRA Node (${loraNodeId}) not found in workflow or missing inputs! Cannot apply LoRA logic. Connecting KSampler directly to Checkpoint.`);
+                    kSamplerNode.inputs.model = [checkpointNodeId, 0]; // Fallback connection
                 }
             } else {
                 console.warn(`Node ${nodeIds.KSAMPLER} (KSampler) not found or missing inputs structure for LoRA handling.`);
             }
-            // ---> END REVISED LoRA Handling Logic <---
+            // ---> END FINAL LoRA Handling Logic <---
         }
     } catch (error) {
         console.error("🚨 Error modifying workflow inputs:", error);

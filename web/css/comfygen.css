@@ -647,3 +647,34 @@ body {
   }
   */
 }
+
+/*----------------------------
+  Quality Mode Styles
+-----------------------------*/
+.settings__radio-group-container {
+  display: flex;
+  flex-direction: column; /* Stack radio options vertically */
+  gap: var(--spacing-sm); /* Space between options */
+  padding-top: var(--spacing-xs); /* Small space below label */
+}
+
+.settings__radio-option {
+  display: flex;
+  align-items: center; /* Align radio button and label */
+  gap: var(--spacing-sm); /* Space between radio and label */
+}
+
+.settings__radio {
+  width: 1.1em; /* Slightly larger radio button */
+  height: 1.1em;
+  margin: 0; /* Reset default margin */
+  accent-color: var(--primary-color); /* Color the radio button */
+  cursor: pointer;
+}
+
+.settings__radio-label {
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: 400;
+  color: var(--text-color);
+}

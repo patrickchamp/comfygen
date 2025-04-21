@@ -92,6 +92,19 @@
                       <label for="seed-input" class="settings__label">Custom Seed</label>
                       <input type="number" id="seed-input" class="settings__input" placeholder="Random if Keep Seed is off" aria-label="Custom seed value" />
                   </div>
+                  <div class="settings__group">
+                      <label class="settings__label">Quality Mode</label>
+                      <div class="settings__radio-group-container">
+                          <div class="settings__radio-option">
+                              <input type="radio" id="quality-mode-fast" name="quality-mode" value="fast" class="settings__radio" checked>
+                              <label for="quality-mode-fast" class="settings__radio-label">Fast (8 Steps, Hyper LoRA)</label>
+                          </div>
+                          <div class="settings__radio-option">
+                              <input type="radio" id="quality-mode-quality" name="quality-mode" value="quality" class="settings__radio">
+                              <label for="quality-mode-quality" class="settings__radio-label">Quality (20 Steps, No Hyper LoRA)</label>
+                          </div>
+                      </div>
+                  </div>
               </fieldset>
           </details>
           

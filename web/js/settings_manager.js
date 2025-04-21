@@ -13,7 +13,9 @@ import {
     getLoraStrengthElement,
     getKeepSeedCheckboxElement,
     getSeedInputElement,
-    getDenoiseStrengthManualInputElement
+    getDenoiseStrengthManualInputElement,
+    getQualityModeFastRadioElement,
+    getQualityModeQualityRadioElement
 } from './ui_elements.js';
 
 import { setPromptInputValue } from './ui_prompt_controls.js';
@@ -31,7 +33,8 @@ const STORAGE_KEYS = {
     DENOISE_STRENGTH: 'denoiseStrength',
     LAST_PROMPT: 'lastPrompt',
     IMAGE_HISTORY: 'imageHistory',
-    CURRENT_IMAGE_INDEX: 'currentImageIndex'
+    CURRENT_IMAGE_INDEX: 'currentImageIndex',
+    QUALITY_MODE: 'qualityMode'
 };
 
 // --- Settings Loading ---
@@ -47,6 +50,15 @@ export function loadAllSettings() {
     const savedHeight = localStorage.getItem(STORAGE_KEYS.IMAGE_HEIGHT);
     if (savedWidth) getImageWidthInputElement().value = savedWidth;
     if (savedHeight) getImageHeightInputElement().value = savedHeight;
+    
+    // Quality Mode
+    const savedQualityMode = localStorage.getItem(STORAGE_KEYS.QUALITY_MODE);
+    if (savedQualityMode === 'quality') {
+        getQualityModeQualityRadioElement().checked = true;
+    } else {
+        // Default to 'fast' if not saved or saved as 'fast'
+        getQualityModeFastRadioElement().checked = true;
+    }
     
     // Steps
     const savedSteps = localStorage.getItem(STORAGE_KEYS.STEPS);
@@ -168,6 +180,18 @@ export function loadInitialSettings() {
  */
 export function savePrompt(prompt) {
     localStorage.setItem(STORAGE_KEYS.LAST_PROMPT, prompt);
+}
+
+/**
+ * Saves the currently selected quality mode ('fast' or 'quality') to localStorage
+ */
+export function saveQualityMode() {
+    let selectedMode = 'fast'; // Default
+    if (getQualityModeQualityRadioElement()?.checked) {
+        selectedMode = 'quality';
+    }
+    localStorage.setItem(STORAGE_KEYS.QUALITY_MODE, selectedMode);
+    console.log(`💾 [Settings] Saved Quality Mode: ${selectedMode}`);
 }
 
 // Export the STORAGE_KEYS object for use in other modules
