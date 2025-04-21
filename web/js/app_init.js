@@ -221,7 +221,27 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
     if (imageUploadInput && uploadedFilenameSpan) {
         imageUploadInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) {
+                // Optionally clear preview if no file selected or selection cancelled
+                // const mainImageElement = UIElements.getMainImageElement();
+                // if (mainImageElement) mainImageElement.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='; // Reset to blank pixel
+                // uploadedFilenameSpan.textContent = 'No image uploaded';
+                // window.uploadedImageFilename = null;
+                return;
+            }
+            
+            // --- START: Add Image Preview Logic ---
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const mainImageElement = UIElements.getMainImageElement();
+                if (mainImageElement) {
+                    mainImageElement.src = event.target.result; // Set src to the Data URL
+                    mainImageElement.alt = `Preview: ${file.name}`; // Update alt text
+                    console.log(`🖼️ Displaying preview for: ${file.name}`);
+                }
+            }
+            reader.readAsDataURL(file);
+            // --- END: Add Image Preview Logic ---
             
             try {
                 // Show loading state
@@ -239,13 +259,57 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
             } catch (error) {
                 uploadedFilenameSpan.textContent = 'Upload failed';
                 console.error('Failed to upload image:', error);
+                // Optionally clear preview on upload failure?
+                // const mainImageElement = UIElements.getMainImageElement();
+                // if (mainImageElement) mainImageElement.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='; // Reset to blank pixel
             }
         });
     }
     
-    // Denoise strength input
+    // Denoise strength input & Presets
     const denoiseStrengthInput = UIElements.getDenoiseStrengthElement();
-    if (denoiseStrengthInput) {
+    const subtlePresetBtn = UIElements.getDenoisePresetSubtleButtonElement();
+    const strongPresetBtn = UIElements.getDenoisePresetStrongButtonElement();
+
+    if (denoiseStrengthInput && subtlePresetBtn && strongPresetBtn) {
+        const updatePresetButtons = (activeValue) => {
+            subtlePresetBtn.classList.remove('active');
+            strongPresetBtn.classList.remove('active');
+            // Use a small tolerance for float comparison
+            if (Math.abs(activeValue - 0.50) < 0.01) {
+                subtlePresetBtn.classList.add('active');
+            } else if (Math.abs(activeValue - 0.85) < 0.01) {
+                strongPresetBtn.classList.add('active');
+            }
+        };
+
+        const updateDenoise = (value) => {
+            denoiseStrengthInput.value = value.toFixed(2); // Ensure 2 decimal places
+            // Trigger the change event listener below to save the setting
+            denoiseStrengthInput.dispatchEvent(new Event('change'));
+        };
+
+        subtlePresetBtn.addEventListener('click', () => {
+            updateDenoise(0.50);
+            updatePresetButtons(0.50); // Update immediately for visual feedback
+        });
+
+        strongPresetBtn.addEventListener('click', () => {
+            updateDenoise(0.85);
+            updatePresetButtons(0.85); // Update immediately for visual feedback
+        });
+
+        // Existing listener for manual changes
+        denoiseStrengthInput.addEventListener('change', (e) => {
+            const currentValue = parseFloat(e.target.value);
+            SettingsManager.saveDenoiseStrength(currentValue);
+            updatePresetButtons(currentValue); // Deselect presets if value doesn't match
+        });
+
+        // Initial button state update based on current value
+        updatePresetButtons(parseFloat(denoiseStrengthInput.value));
+    } else if (denoiseStrengthInput) {
+        // Fallback to original behavior if preset buttons aren't available
         denoiseStrengthInput.addEventListener('change', (e) => {
             SettingsManager.saveDenoiseStrength(e.target.value);
         });

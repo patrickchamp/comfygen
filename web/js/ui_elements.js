@@ -37,6 +37,8 @@ export function initializeUIElements() {
         modeImg2imgRadio: 'mode-img2img',
         imageUploadInput: 'image-upload-input',
         denoiseStrengthInput: 'denoise-strength',
+        denoisePresetSubtleButton: 'denoise-preset-subtle',
+        denoisePresetStrongButton: 'denoise-preset-strong',
         img2imgControls: 'img2img-controls',
         uploadedFilenameSpan: 'uploaded-filename',
 
@@ -97,6 +99,8 @@ export const getModeTxt2imgRadioElement = () => elements.modeTxt2imgRadio;
 export const getModeImg2imgRadioElement = () => elements.modeImg2imgRadio;
 export const getImageUploadInputElement = () => elements.imageUploadInput;
 export const getDenoiseStrengthElement = () => elements.denoiseStrengthInput;
+export const getDenoisePresetSubtleButtonElement = () => elements.denoisePresetSubtleButton;
+export const getDenoisePresetStrongButtonElement = () => elements.denoisePresetStrongButton;
 export const getImg2imgControlsElement = () => elements.img2imgControls;
 export const getUploadedFilenameSpanElement = () => elements.uploadedFilenameSpan;
 
