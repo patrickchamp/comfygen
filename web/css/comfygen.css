@@ -1,245 +1,622 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+/*----------------------------
+  CSS Variables & Global Styles
+-----------------------------*/
+/*
+ * Defines reusable values (colors, spacing, fonts) using CSS Custom Properties (variables).
+ * Establishes base styles for the body and resets default margins/padding.
+ */
+ :root {
+  /* Color Palette */
+  --bg-color: #f4f7f9; /* Light grey-blue background */
+  --text-color: #2d3748; /* Dark grey-blue text */
+  --muted-text-color: #718096; /* Lighter grey for secondary text */
+  --primary-color: #4299e1; /* Primary blue for buttons, highlights */
+  --primary-color-dark: #2b6cb0; /* Darker blue for hover states */
+  --secondary-color: #9f7aea; /* Purple for accents (e.g., history titles) */
+  --accent-color: #ed64a6; /* Pink for accents (e.g., remove buttons) */
+  --card-bg: #ffffff; /* White background for cards */
+  --input-bg: #ffffff; /* White background for inputs */
+  --input-border-color: #cbd5e0; /* Light grey border for inputs */
+  --input-focus-border-color: var(--primary-color); /* Blue border on focus */
+  --input-focus-shadow-color: rgba(66, 153, 225, 0.3); /* Blue glow on focus */
+  --disabled-color: #a0aec0; /* Grey for disabled elements */
+  --progress-bg: #e2e8f0; /* Light grey background for progress bar track */
+  --shadow-color: rgba(0, 0, 0, 0.08); /* Soft shadow for cards */
+  --error-color: #e53e3e; /* Red for error states (if needed) */
 
-  :root {
-    --bg-color: #333;
-    --text-color: #eee;
-    --primary-color: #3a86ff;
-    --secondary-color: #8338ec;
-    --accent-color: #ff006e;
-    --light-gray: #555;
-  }
+  /* Spacing & Sizing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px; /* Standard border radius for inputs, cards */
+  --border-radius-lg: 12px; /* Larger radius for main cards */
+  --input-height: 44px; /* Consistent height for inputs/selects, good for touch */
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-  }
-
-  main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-
-  .container {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-
-  h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    text-align: center;
-    color: var(--primary-color);
-    letter-spacing: -0.5px;
-  }
-
-  .card {
-    background-color: #444;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  #prompt-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #prompt {
-    width: 100%;
-    height: 160px;
-    padding: 0.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-family: 'Poppins', sans-serif;
-    resize: vertical;
-    margin-bottom: 0.5rem;
-    background-color: #bbb;
-    color: #333;
-    outline: none;
-  }
-
-  .btn {
-    display: inline-block;
-    font-weight: 600;
-    text-align: center;
-    vertical-align: middle;
-    user-select: none;
-    border: none;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-  }
-
-  .btn-primary {
-    color: #fff;
-    background-color: var(--primary-color);
-  }
-
-  .btn-secondary {
-    color: var(--text-color);
-    background-color: var(--light-gray);
-  }
-
-  #clear-prompt-button {
-    align-self: flex-end;
-    margin-bottom: 0.5rem;
-  }
-
-  #image-settings {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  /* Transitions */
+  --transition-speed: 0.2s;
+  --transition-ease: ease-in-out;
 }
 
-#image-settings > div {
-  display: flex;
-  flex-direction: column;
+/* Global Reset and Box Sizing */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-#image-settings label {
-  font-size: 0.8rem;
-  margin-bottom: 0.25rem;
+/* Base font size for rem calculations */
+html {
+  font-size: 100%;
+}
+
+/* Body styles: Font, background, text color, anti-aliasing */
+body {
+  font-family: 'Poppins', sans-serif; /* Use imported Google Font */
+  background-color: var(--bg-color);
   color: var(--text-color);
+  line-height: 1.6; /* Improve readability */
+  -webkit-font-smoothing: antialiased; /* Smoother fonts on WebKit */
+  -moz-osx-font-smoothing: grayscale; /* Smoother fonts on Firefox */
 }
 
-#image-settings input,
-#image-settings select {
+/*----------------------------
+  Layout & Container
+-----------------------------*/
+/*
+ * Defines the main layout structure, centering content within a container.
+ */
+.main {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center content horizontally */
+  min-height: 100vh; /* Ensure main takes at least full viewport height */
+  padding: var(--spacing-md); /* Padding around the content */
+}
+
+.container {
   width: 100%;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  background-color: var(--light-gray);
+  max-width: 600px; /* Constrain content width for readability on larger screens */
+  margin: 0 auto; /* Center the container itself */
+}
+
+/*----------------------------
+  Header
+-----------------------------*/
+.header {
+  margin-bottom: var(--spacing-lg); /* Space below the header */
+}
+
+.header__title {
+  font-size: 1.75rem;
+  font-weight: 600; /* Semi-bold */
+  text-align: center;
+  color: var(--primary-color);
+  letter-spacing: -0.5px; /* Slightly tighter spacing */
+}
+
+/*----------------------------
+  Card Component
+-----------------------------*/
+/*
+ * Base styles for card elements used to group sections of the UI.
+ */
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 12px var(--shadow-color); /* Soft shadow effect */
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg); /* Space between cards */
+  overflow: hidden; /* Ensures content respects border radius */
+}
+
+/* Specific padding adjustments for certain cards */
+.card--prompt { padding-top: var(--spacing-md); }
+.card--image { padding: var(--spacing-md); }
+
+
+/*----------------------------
+  Buttons
+-----------------------------*/
+/*
+ * Base styles for all button types.
+ * Uses a pill shape and includes transitions for hover/active states.
+ */
+.btn {
+  display: inline-block; /* Allows setting padding/margin */
+  font-family: inherit; /* Use body font */
+  font-weight: 600; /* Semi-bold */
+  text-align: center;
+  vertical-align: middle;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.95rem;
+  border: 1px solid transparent; /* Base border */
+  border-radius: 50px; /* Pill shape */
+  cursor: pointer;
+  transition: background-color var(--transition-speed) var(--transition-ease),
+              color var(--transition-speed) var(--transition-ease),
+              transform var(--transition-speed) var(--transition-ease),
+              box-shadow var(--transition-speed) var(--transition-ease);
+  user-select: none; /* Prevent text selection on buttons */
+  min-height: var(--input-height); /* Match input height for consistency */
+  line-height: 1.5; /* Helps vertical alignment of text */
+}
+
+/* Primary button style (e.g., Generate) */
+.btn--primary {
+  color: #fff; /* White text */
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn--primary:hover {
+  background-color: var(--primary-color-dark); /* Darker blue on hover */
+  border-color: var(--primary-color-dark);
+}
+
+/* Secondary button style (e.g., Clear, Prev/Next) */
+.btn--secondary {
   color: var(--text-color);
-  font-size: 0.9rem;
+  background-color: var(--progress-bg); /* Use progress bar background color */
+  border-color: var(--progress-bg);
+}
+.btn--secondary:hover {
+  background-color: #d1d9e6; /* Slightly darker grey on hover */
+  border-color: #d1d9e6;
 }
 
-#image-settings input[type="checkbox"] {
-  width: auto;
-  margin-right: 0.5rem;
+/* Full-width button modifier */
+.btn--full {
+  width: 100%;
+  display: block; /* Ensure it takes full width */
 }
 
-.checkbox-container {
+/* Slight scale down on click */
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Focus styles for accessibility */
+.btn:focus {
+  outline: none; /* Remove default browser outline */
+  box-shadow: 0 0 0 3px var(--input-focus-shadow-color); /* Add custom focus ring */
+}
+/* Remove focus ring if focus was not triggered by keyboard (mouse click) */
+.btn:focus:not(:focus-visible) {
+    box-shadow: none;
+}
+/* Style specifically for keyboard focus */
+.btn:focus-visible {
+    box-shadow: 0 0 0 3px var(--input-focus-shadow-color);
+}
+
+/* Disabled button styles */
+.btn:disabled {
+  background-color: var(--disabled-color);
+  border-color: var(--disabled-color);
+  color: var(--card-bg); /* Use card background for text color */
+  cursor: not-allowed; /* Indicate non-interactive state */
+  opacity: 0.7;
+  transform: none; /* Disable active transform */
+}
+
+/* Specific styling for the smaller 'Clear' button */
+.btn--clear-prompt {
+  padding: 0.5rem 1rem; /* Smaller padding */
+  font-size: 0.85rem;
+  min-height: auto; /* Allow smaller height */
+  margin-left: var(--spacing-sm); /* Space from textarea */
+  flex-shrink: 0; /* Prevent shrinking if container is tight */
+}
+
+/*----------------------------
+  Prompt Section
+-----------------------------*/
+/*
+ * Styles for the prompt input area, including the textarea and clear button positioning.
+ */
+.prompt__container {
   display: flex;
+  align-items: flex-start; /* Align clear button to top of textarea */
+  margin-bottom: var(--spacing-lg); /* Space below prompt area */
+  position: relative; /* Needed for absolute positioning of clear button */
+}
+
+.prompt__textarea {
+  width: 100%;
+  min-height: 100px; /* Minimum comfortable height */
+  padding: var(--spacing-sm) var(--spacing-md);
+  padding-right: 80px; /* Make space for the absolutely positioned clear button */
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius-md);
+  font-family: inherit;
+  font-size: 1rem;
+  background-color: var(--input-bg);
+  resize: vertical; /* Allow user to resize vertically */
+  transition: border-color var(--transition-speed) var(--transition-ease),
+              box-shadow var(--transition-speed) var(--transition-ease);
+  flex-grow: 1; /* Allow textarea to take available width */
+}
+
+/* Focus state for textarea */
+.prompt__textarea:focus {
+  outline: none;
+  border-color: var(--input-focus-border-color);
+  box-shadow: 0 0 0 2px var(--input-focus-shadow-color);
+}
+
+/* Position the clear button inside the top-right corner of the container */
+.prompt__container .btn--clear-prompt {
+    position: absolute;
+    right: var(--spacing-sm);
+    top: var(--spacing-sm);
+}
+
+/*----------------------------
+  Settings Section
+-----------------------------*/
+/*
+ * Styles for the settings fieldset and its child groups (inputs, selects, checkboxes).
+ */
+.settings {
+  display: flex;
+  flex-direction: column; /* Stack setting groups vertically */
+  gap: var(--spacing-md); /* Space between setting groups */
+  margin-bottom: var(--spacing-lg); /* Space below settings block */
+  padding: 0; /* Override fieldset default padding */
+  border: none; /* Override fieldset default border */
+}
+
+/* Individual setting group container */
+.settings__group {
+  display: flex;
+  flex-direction: column; /* Default: Label above input */
+  gap: var(--spacing-xs); /* Small gap between label and input */
+}
+
+/* Modifier for inline groups (e.g., width/height, steps/LoRA) */
+.settings__group--inline {
+    flex-direction: row; /* Arrange items horizontally */
+    align-items: center; /* Align items vertically in the middle */
+    gap: var(--spacing-md); /* Space between items in the row */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+/* Subgroup used within inline groups (e.g., for width input and height input) */
+.settings__subgroup {
+    display: flex;
+    flex-direction: column; /* Label above input within subgroup */
+    gap: var(--spacing-xs);
+    flex: 1; /* Allow subgroups to share horizontal space equally */
+    min-width: 100px; /* Prevent subgroups from becoming too narrow */
+}
+
+/* Label styles */
+.settings__label {
+  font-size: 0.875rem;
+  font-weight: 400; /* Normal weight */
+  color: var(--muted-text-color);
+  display: block; /* Ensure label takes its own line (in default column layout) */
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Common styles for text inputs and select dropdowns */
+.settings__input,
+.settings__select {
+  width: 100%; /* Take full width of parent group/subgroup */
+  height: var(--input-height); /* Consistent height */
+  padding: 0 var(--spacing-md); /* Horizontal padding */
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius-md);
+  font-size: 0.95rem;
+  background-color: var(--input-bg);
+  transition: border-color var(--transition-speed) var(--transition-ease),
+              box-shadow var(--transition-speed) var(--transition-ease);
+}
+
+/* Focus states for inputs and selects */
+.settings__input:focus,
+.settings__select:focus {
+  outline: none;
+  border-color: var(--input-focus-border-color);
+  box-shadow: 0 0 0 2px var(--input-focus-shadow-color);
+}
+
+/* Custom Select Arrow */
+.settings__select {
+  appearance: none; /* Remove default browser arrow */
+  /* Add custom arrow using SVG background image */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23718096' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center; /* Position arrow on the right */
+  background-size: 1em; /* Size of the arrow */
+  padding-right: calc(var(--spacing-md) * 2.5); /* Add padding to prevent text overlapping arrow */
+}
+
+/* Checkbox Styling */
+.settings__group--checkbox {
+  flex-direction: row; /* Align checkbox and label horizontally */
+  align-items: center;
+  gap: var(--spacing-sm); /* Space between checkbox and label */
+  margin-top: var(--spacing-xs); /* Align vertically with other inputs in inline groups */
+}
+
+.settings__checkbox {
+  width: 1.15em; /* Slightly larger checkbox */
+  height: 1.15em;
+  margin-top: 0; /* Reset default margin */
+  accent-color: var(--primary-color); /* Color the checkmark/background (modern browsers) */
+  cursor: pointer;
+}
+
+/* Adjust checkbox label styles when in an inline group */
+.settings__group--checkbox .settings__label {
+  margin-bottom: 0; /* Remove bottom margin */
+  font-weight: 400; /* Reset font weight */
+  color: var(--text-color); /* Use standard text color */
+}
+
+/* Seed Display Span */
+.settings__seed {
+  font-size: 0.9rem;
+  color: var(--muted-text-color);
+  margin-left: var(--spacing-sm);
+  font-style: italic;
+  white-space: nowrap; /* Prevent wrapping */
+  margin-left: auto; /* Push seed display to the right in its inline group */
+  padding-left: var(--spacing-md); /* Space from the "Keep Seed" checkbox */
+}
+
+/* Img2Img specific styles */
+.settings__radio-group {
+  display: flex;
+  align-items: center;
+  margin-right: var(--spacing-md);
+}
+
+.settings__radio-group input[type="radio"] {
+  margin-right: var(--spacing-xs);
+  cursor: pointer;
+}
+
+.settings__radio-group label {
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.settings__filename {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted-text-color);
+  margin-top: var(--spacing-xs);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Visually Hidden Class for Accessibility */
+/* Hides elements visually but keeps them accessible to screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px; /* Avoid potential layout shifts */
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0); /* Clip element */
+  white-space: nowrap; /* Prevent wrapping */
+  border: 0;
+}
+
+
+/*----------------------------
+  Progress Bar
+-----------------------------*/
+.progress {
+  width: 100%;
+  height: 8px; /* Slim progress bar */
+  appearance: none; /* Remove default browser styling */
+  border: none;
+  border-radius: 50px; /* Rounded ends */
+  overflow: hidden; /* Ensure progress value respects border radius */
+  background-color: var(--progress-bg); /* Track color */
+  margin-top: var(--spacing-lg); /* Space above progress bar */
+}
+/* Style track for WebKit browsers (Chrome, Safari) */
+.progress::-webkit-progress-bar {
+  background-color: var(--progress-bg);
+  border-radius: 50px;
+}
+/* Style progress value for WebKit browsers */
+.progress::-webkit-progress-value {
+  background-color: var(--primary-color); /* Use primary color for fill */
+  border-radius: 50px;
+  transition: width var(--transition-speed) linear; /* Animate progress changes smoothly */
+}
+/* Style progress value for Firefox */
+.progress::-moz-progress-bar {
+  background-color: var(--primary-color);
+  border-radius: 50px;
+   transition: width var(--transition-speed) linear;
+}
+
+/*----------------------------
+  Image Section
+-----------------------------*/
+/*
+ * Styles for the generated image display and navigation controls.
+ */
+.card__image {
+  display: block; /* Remove extra space below image */
+  width: 100%; /* Make image responsive */
+  max-width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  background-color: #f0f0f0; /* Light grey placeholder background */
+  border-radius: var(--border-radius-md); /* Match input radius */
+  margin-bottom: var(--spacing-md); /* Space below image */
+  border: 1px solid var(--input-border-color); /* Subtle border */
+  min-height: 200px; /* Ensure card has some height even before image loads */
+  object-fit: contain; /* Ensure image fits within bounds without stretching */
+}
+
+/* Container for image navigation buttons and counter */
+.image-nav {
+  display: flex;
+  justify-content: space-between; /* Space out buttons and counter */
   align-items: center;
 }
 
-#current-seed {
-  font-size: 0.8rem;
-  color: var(--text-color);
-  margin-top: 0.25rem;
+/* Image counter text style */
+.image-nav__counter {
+  font-size: 0.9rem;
+  color: var(--muted-text-color);
+  font-weight: 400;
 }
 
-#seed-input {
-  margin-top: 0.25rem;
+/* Smaller buttons specifically for image navigation */
+.image-nav .btn {
+    padding: 0.5rem 1rem;
 }
 
-  #send-prompt-button {
-    width: 100%;
-  }
+/*----------------------------
+  History Section
+-----------------------------*/
+/*
+ * Styles for the recent and favorite prompt lists.
+ */
+.history {
+    margin-top: var(--spacing-xl); /* Extra space above history section */
+}
 
-  #maingen {
-    width: 100%;
-    height: auto;
-    background: #111;
-    border-radius: 6px;
-    object-fit: contain;
-    object-position: center;
-  }
+/* History section titles (Recent Prompts, Favorite Prompts) */
+.history__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  color: var(--secondary-color); /* Use secondary color for titles */
+  border-bottom: 1px solid var(--progress-bg); /* Subtle separator line */
+  padding-bottom: var(--spacing-xs);
+}
 
-  #main-progress {
-    width: 100%;
-    height: 4px;
-    background-color: #607D8B;
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 0.5rem;
-    border: 0;
-  }
+/* Styling for the <ul> elements containing history items */
+.history__list {
+  list-style: none; /* Remove default bullet points */
+  margin-bottom: var(--spacing-lg);
+  background-color: var(--card-bg); /* Give lists a card-like background */
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 6px var(--shadow-color); /* Subtle shadow */
+  padding: var(--spacing-sm) 0; /* Vertical padding */
+}
 
-  .image-navigation {
-    display: flex;
-    justify-content: space-between;
+/* Individual prompt item (<li>) */
+.prompt-item {
+  display: flex;
+  align-items: center; /* Align text and buttons vertically */
+  padding: var(--spacing-sm) var(--spacing-md); /* Padding within list item */
+  border-bottom: 1px solid var(--progress-bg); /* Separator line between items */
+  gap: var(--spacing-sm); /* Space between text and buttons */
+}
+/* Remove border from the last item in the list */
+.prompt-item:last-child {
+  border-bottom: none;
+}
+
+/* Prompt text span within the list item */
+.prompt-text {
+  flex-grow: 1; /* Allow text to take available space */
+  cursor: pointer; /* Indicate text is clickable (to reuse prompt) */
+  font-size: 0.95rem;
+  word-break: break-word; /* Prevent long prompts from overflowing */
+  transition: color var(--transition-speed) var(--transition-ease);
+}
+/* Highlight prompt text on hover */
+.prompt-text:hover {
+    color: var(--primary-color);
+}
+
+/* Common styles for favorite and remove buttons in history list */
+.favorite-button, .remove-button {
+  background: none; /* Transparent background */
+  border: none;
+  font-size: 1.3rem; /* Make icons larger */
+  padding: var(--spacing-xs); /* Small padding for easier clicking */
+  cursor: pointer;
+  line-height: 1; /* Prevent extra vertical space */
+  transition: color var(--transition-speed) var(--transition-ease),
+              transform var(--transition-speed) var(--transition-ease);
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+/* Favorite button (star) styling */
+.favorite-button { color: var(--muted-text-color); } /* Default outline star */
+.favorite-button.is-favorite { color: #fcc419; } /* Use gold color for filled star (if needed, JS might just change innerHTML) */
+/* Remove button (cross) styling */
+.remove-button { color: var(--accent-color); } /* Use accent pink */
+
+/* Scale effect on button hover/active */
+.favorite-button:hover, .remove-button:hover {
+    transform: scale(1.1);
+}
+.favorite-button:active, .remove-button:active {
+    transform: scale(0.95);
+}
+
+/* Style for the placeholder message shown when lists are empty */
+.empty-message {
+  color: var(--muted-text-color);
+  font-style: italic;
+  text-align: center;
+  padding: var(--spacing-md) var(--spacing-md);
+  font-size: 0.9rem;
+  border-bottom: none !important; /* Ensure no border if it's the only item */
+}
+
+/*----------------------------
+  Animations
+-----------------------------*/
+/*
+ * Simple fade-in animation for cards.
+ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); } /* Start transparent and slightly down */
+  to { opacity: 1; transform: translateY(0); } /* Fade in and move up */
+}
+
+/* Class to apply the fade-in animation */
+.fade-in {
+  animation: fadeIn 0.5s var(--transition-ease) forwards; /* Apply animation */
+  opacity: 0; /* Start hidden before animation runs */
+}
+
+/* Stagger the animation for different sections */
+.card--image.fade-in {
+    animation-delay: 0.1s; /* Image card fades in slightly later */
+}
+.history.fade-in {
+    animation-delay: 0.2s; /* History section fades in last */
+}
+
+
+/*----------------------------
+  Media Queries (Optional Example)
+-----------------------------*/
+/*
+ * Example media query for adjustments on larger screens (tablets/desktops).
+ */
+@media (min-width: 640px) {
+  /* Example: Make settings labels align horizontally with inputs */
+  /*
+  .settings__group {
+    flex-direction: row;
     align-items: center;
-    margin-top: 0.5rem;
   }
-
-  #image-counter {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-color);
+  .settings__label {
+      flex-basis: 120px; // Give labels a fixed width
+      flex-shrink: 0;
+      margin-bottom: 0; // Remove bottom margin when inline
   }
-
-  #prompt-history {
-    margin-top: 1rem;
-    background-color: #555;
-    border-radius: 4px;
-    padding: 0.5rem;
-  }
-
-  #prompt-history h3 {
-    color: #eee;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .prompt-item {
-    background-color: #666;
-    border-radius: 4px;
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-  }
-
-  .prompt-text {
-    flex-grow: 1;
-    margin-right: 0.5rem;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .favorite-button,
-  .remove-button {
-    background-color: transparent;
-    border: none;
-    color: #eee;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 0.25rem;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .fade-in {
-    animation: fadeIn 0.5s ease-in;
-  }
+  */
+}
