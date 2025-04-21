@@ -60,6 +60,10 @@ body {
   line-height: 1.6; /* Improve readability */
   -webkit-font-smoothing: antialiased; /* Smoother fonts on WebKit */
   -moz-osx-font-smoothing: grayscale; /* Smoother fonts on Firefox */
+  display: flex; /* Use flexbox for overall layout */
+  flex-direction: column; /* Stack children vertically */
+  min-height: 100vh; /* Ensure body takes at least full viewport height */
+  min-height: 100svh; /* Use small viewport height for better mobile handling */
 }
 
 /*----------------------------
@@ -80,6 +84,9 @@ body {
   width: 100%;
   max-width: 600px; /* Constrain content width for readability on larger screens */
   margin: 0 auto; /* Center the container itself */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allow container to grow */
 }
 
 /*----------------------------
@@ -114,7 +121,13 @@ body {
 
 /* Specific padding adjustments for certain cards */
 .card--prompt { padding-top: var(--spacing-md); }
-.card--image { padding: var(--spacing-md); }
+.card--image { 
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column; /* Stack image and nav vertically */
+  flex-shrink: 0; /* Prevent this card from shrinking */
+  overflow: hidden; /* Important: contains the potentially larger image */
+}
 
 
 /*----------------------------
@@ -469,6 +482,8 @@ body {
   border: 1px solid var(--input-border-color); /* Subtle border */
   min-height: 200px; /* Ensure card has some height even before image loads */
   object-fit: contain; /* Ensure image fits within bounds without stretching */
+  flex-grow: 1; /* Allow image to take space within the card */
+  max-height: calc(100% - 60px); /* Calculate max height minus nav height + padding */
 }
 
 /* Container for image navigation buttons and counter */
@@ -476,6 +491,9 @@ body {
   display: flex;
   justify-content: space-between; /* Space out buttons and counter */
   align-items: center;
+  flex-shrink: 0; /* Prevent nav from shrinking */
+  padding-top: var(--spacing-sm); /* Add some space above nav */
+  padding-bottom: var(--spacing-sm); /* Ensure padding below */
 }
 
 /* Image counter text style */
