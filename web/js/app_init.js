@@ -24,7 +24,7 @@ import * as api from './api.js'; // Import api module for image upload
 import { fetchLoras } from './api.js';
 
 // Import new save functions
-import { saveSelectedLora, saveLoraStrength } from './settings_manager.js';
+import { saveLoraName, saveLoraStrength } from './settings_manager.js';
 
 // UI Element Getters (for event listeners & passing to modules)
 import * as UIElements from './ui_elements.js';
@@ -230,7 +230,7 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
     // ---> ADD NEW LoRA Listeners <---
     // LoRA Selection Dropdown
     UIElements.getLoraSelectElement()?.addEventListener('change', (e) => {
-        saveSelectedLora(e.target.value);
+        saveLoraName(e.target.value);
         console.log(`💾 Selected LoRA saved: ${e.target.value}`);
     });
 
@@ -286,26 +286,7 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
         }
     });
 
-    // --- Img2Img Controls ---
-    // Mode selection radio buttons
-    const txt2imgRadio = UIElements.getModeTxt2imgRadioElement();
-    const img2imgRadio = UIElements.getModeImg2imgRadioElement();
-    const img2imgControls = UIElements.getImg2imgControlsElement();
-    
-    if (txt2imgRadio && img2imgRadio && img2imgControls) {
-        // Function to update UI based on selected mode
-        const updateModeUI = () => {
-            const selectedMode = document.querySelector('input[name="generation-mode"]:checked').value;
-            img2imgControls.style.display = selectedMode === 'img2img' ? 'block' : 'none';
-            SettingsManager.saveGenerationMode(selectedMode);
-            console.log(`🔄 Generation mode changed to: ${selectedMode}`);
-        };
-        
-        // Add listeners to both radio buttons
-        txt2imgRadio.addEventListener('change', updateModeUI);
-        img2imgRadio.addEventListener('change', updateModeUI);
-    }
-    
+    // --- Image Upload Controls ---
     // Image upload input
     const imageUploadInput = UIElements.getImageUploadInputElement();
     const uploadedFilenameSpan = UIElements.getUploadedFilenameSpanElement();
@@ -325,6 +306,15 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
                 // Store the filename for use in img2img generation
                 window.uploadedImageFilename = result.name;
                 
+                // Set default denoise when image is uploaded
+                const denoiseInput = UIElements.getDenoiseStrengthManualInputElement();
+                if (denoiseInput && denoiseInput.value === "0.85") { // Only change if it's still the Strong default
+                    const subtleValue = 0.50;
+                    denoiseInput.value = subtleValue;
+                    SettingsManager.saveDenoiseStrength(); // Save the new default
+                    console.log(`🎨 Defaulting denoise strength to Subtle (${subtleValue}) on image upload.`);
+                }
+                
                 // Update the UI
                 uploadedFilenameSpan.textContent = `Uploaded: ${result.name}`;
                 console.log(`🖼️ Image uploaded successfully: ${result.name}`);
@@ -335,8 +325,33 @@ function setupEventListeners(queuePromptFunc, clearPromptFunc) {
         });
     }
     
-    // Denoise strength input
-    const denoiseStrengthInput = UIElements.getDenoiseStrengthElement();
+    // --- Vary Buttons ---
+    // Vary (Subtle) Button
+    const subtleButton = UIElements.getVarySubtleButtonElement();
+    subtleButton?.addEventListener('click', () => {
+        const denoiseInput = UIElements.getDenoiseStrengthManualInputElement();
+        if (denoiseInput) {
+            const subtleValue = 0.50;
+            denoiseInput.value = subtleValue;
+            SettingsManager.saveDenoiseStrength(); // Call the existing save function
+            console.log(`🎨 Denoise strength set to Subtle: ${subtleValue}`);
+        }
+    });
+    
+    // Vary (Strong) Button
+    const strongButton = UIElements.getVaryStrongButtonElement();
+    strongButton?.addEventListener('click', () => {
+        const denoiseInput = UIElements.getDenoiseStrengthManualInputElement();
+        if (denoiseInput) {
+            const strongValue = 0.85;
+            denoiseInput.value = strongValue;
+            SettingsManager.saveDenoiseStrength(); // Call the existing save function
+            console.log(`🎨 Denoise strength set to Strong: ${strongValue}`);
+        }
+    });
+    
+    // Denoise strength manual input
+    const denoiseStrengthInput = UIElements.getDenoiseStrengthManualInputElement();
     if (denoiseStrengthInput) {
         denoiseStrengthInput.addEventListener('change', (e) => {
             SettingsManager.saveDenoiseStrength(e.target.value);

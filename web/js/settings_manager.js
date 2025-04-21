@@ -1,248 +1,172 @@
 // web/js/settings_manager.js
 
 /**
- * @fileoverview Manages loading and saving user settings to localStorage.
+ * @fileoverview Manages application settings using localStorage
  */
 
-import * as PromptControlUI from './ui_prompt_controls.js';
-import * as UIElements from './ui_elements.js'; // For accessing elements like checkboxes, presets
-import * as SeedManagement from './seed_management.js'; // To set initial seed state
+import { 
+    getImageWidthInputElement,
+    getImageHeightInputElement,
+    getStepsInputElement,
+    getEnableLoraCheckboxElement,
+    getLoraSelectElement,
+    getLoraStrengthElement,
+    getKeepSeedCheckboxElement,
+    getSeedInputElement,
+    getDenoiseStrengthManualInputElement
+} from './ui_elements.js';
 
-// --- localStorage Keys ---
-const KEYS = {
-    LAST_PROMPT: 'lastPrompt',
+import { setPromptInputValue } from './ui_prompt_controls.js';
+
+// --- Constants ---
+const STORAGE_KEYS = {
     IMAGE_WIDTH: 'imageWidth',
     IMAGE_HEIGHT: 'imageHeight',
     STEPS: 'steps',
     ENABLE_LORA: 'enableLora',
-    SELECTED_LORA: 'selectedLora',
+    LORA_NAME: 'loraName',
     LORA_STRENGTH: 'loraStrength',
-    SAVED_SEED: 'savedSeed', // Stores the seed value when "Keep Seed" is ON
-    KEEP_SEED_PREF: 'keepSeedPreference', // Explicitly save checkbox state
-    DENOISE_STRENGTH: 'denoiseStrength', // New key for img2img denoise strength
-    GENERATION_MODE: 'generationMode' // New key for txt2img/img2img mode
+    KEEP_SEED: 'keepSeed',
+    SEED: 'seed',
+    DENOISE_STRENGTH: 'denoiseStrength',
+    LAST_PROMPT: 'lastPrompt'
 };
 
+// --- Settings Loading ---
+
 /**
- * Loads initial settings from localStorage and applies them to the UI.
- * Called once during application startup by app_init.js.
+ * Loads all saved settings from localStorage and applies them to the UI
+ */
+export function loadAllSettings() {
+    console.log('🔧 [Settings] Loading saved settings...');
+    
+    // Image Dimensions
+    const savedWidth = localStorage.getItem(STORAGE_KEYS.IMAGE_WIDTH);
+    const savedHeight = localStorage.getItem(STORAGE_KEYS.IMAGE_HEIGHT);
+    if (savedWidth) getImageWidthInputElement().value = savedWidth;
+    if (savedHeight) getImageHeightInputElement().value = savedHeight;
+    
+    // Steps
+    const savedSteps = localStorage.getItem(STORAGE_KEYS.STEPS);
+    if (savedSteps) getStepsInputElement().value = savedSteps;
+    
+    // LoRA Settings
+    const savedEnableLora = localStorage.getItem(STORAGE_KEYS.ENABLE_LORA);
+    const savedLoraName = localStorage.getItem(STORAGE_KEYS.LORA_NAME);
+    const savedLoraStrength = localStorage.getItem(STORAGE_KEYS.LORA_STRENGTH);
+    
+    if (savedEnableLora) {
+        getEnableLoraCheckboxElement().checked = savedEnableLora === 'true';
+        if (savedLoraName) getLoraSelectElement().value = savedLoraName;
+        if (savedLoraStrength) getLoraStrengthElement().value = savedLoraStrength;
+    }
+    
+    // Seed Settings
+    const savedKeepSeed = localStorage.getItem(STORAGE_KEYS.KEEP_SEED);
+    const savedSeed = localStorage.getItem(STORAGE_KEYS.SEED);
+    if (savedKeepSeed) getKeepSeedCheckboxElement().checked = savedKeepSeed === 'true';
+    if (savedSeed) getSeedInputElement().value = savedSeed;
+    
+    // Denoise Strength
+    const savedDenoiseStrength = localStorage.getItem(STORAGE_KEYS.DENOISE_STRENGTH);
+    if (savedDenoiseStrength) getDenoiseStrengthManualInputElement().value = savedDenoiseStrength;
+
+    // Last Prompt
+    const savedPrompt = localStorage.getItem(STORAGE_KEYS.LAST_PROMPT);
+    if (savedPrompt) {
+        setPromptInputValue(savedPrompt); // Use imported function
+    }
+    
+    console.log('  ✅ [Settings] Settings loaded successfully');
+}
+
+// --- Settings Saving ---
+
+/**
+ * Saves the current image width to localStorage
+ */
+export function saveImageWidth() {
+    const width = getImageWidthInputElement().value;
+    localStorage.setItem(STORAGE_KEYS.IMAGE_WIDTH, width);
+}
+
+/**
+ * Saves the current image height to localStorage
+ */
+export function saveImageHeight() {
+    const height = getImageHeightInputElement().value;
+    localStorage.setItem(STORAGE_KEYS.IMAGE_HEIGHT, height);
+}
+
+/**
+ * Saves the current steps value to localStorage
+ */
+export function saveSteps() {
+    const steps = getStepsInputElement().value;
+    localStorage.setItem(STORAGE_KEYS.STEPS, steps);
+}
+
+/**
+ * Saves the current LoRA enable state to localStorage
+ */
+export function saveEnableLora() {
+    const enabled = getEnableLoraCheckboxElement().checked;
+    localStorage.setItem(STORAGE_KEYS.ENABLE_LORA, enabled);
+}
+
+/**
+ * Saves the current LoRA name to localStorage
+ */
+export function saveLoraName() {
+    const loraName = getLoraSelectElement().value;
+    localStorage.setItem(STORAGE_KEYS.LORA_NAME, loraName);
+}
+
+/**
+ * Saves the current LoRA strength to localStorage
+ */
+export function saveLoraStrength() {
+    const strength = getLoraStrengthElement().value;
+    localStorage.setItem(STORAGE_KEYS.LORA_STRENGTH, strength);
+}
+
+/**
+ * Saves the current keep seed state to localStorage
+ */
+export function saveKeepSeed() {
+    const keepSeed = getKeepSeedCheckboxElement().checked;
+    localStorage.setItem(STORAGE_KEYS.KEEP_SEED, keepSeed);
+}
+
+/**
+ * Saves the current seed value to localStorage
+ */
+export function saveSeed() {
+    const seed = getSeedInputElement().value;
+    localStorage.setItem(STORAGE_KEYS.SEED, seed);
+}
+
+/**
+ * Saves the current denoise strength to localStorage
+ */
+export function saveDenoiseStrength() {
+    const strength = getDenoiseStrengthManualInputElement().value;
+    localStorage.setItem(STORAGE_KEYS.DENOISE_STRENGTH, strength);
+}
+
+/**
+ * Alias for loadAllSettings to maintain compatibility with app_init.js
  */
 export function loadInitialSettings() {
-    console.log("💾 [Settings Manager] Loading initial settings...");
-
-    // --- Load Last Prompt ---
-    const lastPrompt = localStorage.getItem(KEYS.LAST_PROMPT);
-    if (lastPrompt) {
-        PromptControlUI.setPromptInputValue(lastPrompt);
-    }
-
-    // --- Load Generation Mode ---
-    const savedMode = localStorage.getItem(KEYS.GENERATION_MODE) || 'txt2img';
-    const txt2imgRadio = UIElements.getModeTxt2imgRadioElement();
-    const img2imgRadio = UIElements.getModeImg2imgRadioElement();
-    const img2imgControls = UIElements.getImg2imgControlsElement();
-    
-    if (txt2imgRadio && img2imgRadio && img2imgControls) {
-        if (savedMode === 'img2img') {
-            img2imgRadio.checked = true;
-            img2imgControls.style.display = 'block';
-        } else {
-            txt2imgRadio.checked = true;
-            img2imgControls.style.display = 'none';
-        }
-    }
-
-    // --- Load Denoise Strength ---
-    const savedDenoise = localStorage.getItem(KEYS.DENOISE_STRENGTH);
-    const denoiseInput = UIElements.getDenoiseStrengthElement();
-    if (savedDenoise && denoiseInput) {
-        denoiseInput.value = savedDenoise;
-    } else if (denoiseInput) {
-        // If nothing saved, ensure the default from HTML is saved now
-        saveSetting(KEYS.DENOISE_STRENGTH, denoiseInput.value);
-    }
-
-    // --- Load Image Dimensions ---
-    const savedWidth = localStorage.getItem(KEYS.IMAGE_WIDTH);
-    const savedHeight = localStorage.getItem(KEYS.IMAGE_HEIGHT);
-    const widthInput = UIElements.getImageWidthInputElement();
-    const heightInput = UIElements.getImageHeightInputElement();
-    // Use saved values OR the current input values (which might be HTML defaults)
-    const initialWidth = savedWidth || (widthInput ? widthInput.value : '576'); // Provide defaults
-    const initialHeight = savedHeight || (heightInput ? heightInput.value : '1024');
-    PromptControlUI.updateImageDimensionInputs(initialWidth, initialHeight);
-
-    // Try to match loaded dimensions to a preset option
-    const currentPresetValue = `${initialWidth}x${initialHeight}`;
-    const presetSelector = UIElements.getImageSizePresetElement();
-    if (presetSelector) {
-        const presetFound = [...presetSelector.options].some(option => option.value === currentPresetValue);
-        presetSelector.value = presetFound ? currentPresetValue : ""; // Set to preset or "Custom"
-    }
-
-    // --- Load Steps ---
-    const savedSteps = localStorage.getItem(KEYS.STEPS);
-    const stepsInput = UIElements.getStepsInputElement();
-    if (savedSteps && stepsInput) {
-        stepsInput.value = savedSteps;
-    } else if (stepsInput) {
-        // If nothing saved, ensure the default from HTML is saved now
-        saveSetting(KEYS.STEPS, stepsInput.value);
-    }
-
-    // --- Load LoRA Preference ---
-    const savedEnableLora = localStorage.getItem(KEYS.ENABLE_LORA);
-    const loraCheckbox = UIElements.getEnableLoraCheckboxElement();
-    if (loraCheckbox) {
-        if (savedEnableLora !== null) {
-            loraCheckbox.checked = savedEnableLora === 'true'; // Compare against 'true' string
-        } else {
-            // Default to checked if never saved before and save it
-            loraCheckbox.checked = true;
-            saveSetting(KEYS.ENABLE_LORA, 'true');
-        }
-    }
-
-    // ---> Load LoRA Selection and Strength <---
-    const savedLora = localStorage.getItem(KEYS.SELECTED_LORA);
-    const savedStrength = localStorage.getItem(KEYS.LORA_STRENGTH);
-    const loraSelect = UIElements.getLoraSelectElement();
-    const loraStrengthInput = UIElements.getLoraStrengthElement();
-    const loraStrengthValueSpan = UIElements.getLoraStrengthValueElement();
-
-    if (loraSelect) {
-        // Note: Population happens first in app_init.js, so options should exist here.
-        // We only set the value if it was previously saved AND the option exists.
-        if (savedLora && [...loraSelect.options].some(opt => opt.value === savedLora)) {
-            loraSelect.value = savedLora;
-        } else {
-             loraSelect.value = ""; // Default to "Select LoRA"
-             // If a value was saved but isn't in the list anymore, remove the saved setting
-             if (savedLora) localStorage.removeItem(KEYS.SELECTED_LORA);
-        }
-    }
-
-    const initialStrength = savedStrength ? parseFloat(savedStrength) : 0.8;
-    if (loraStrengthInput) {
-        loraStrengthInput.value = initialStrength;
-    }
-    if (loraStrengthValueSpan) {
-        loraStrengthValueSpan.textContent = initialStrength.toFixed(2);
-    }
-     // Ensure default is saved if nothing was loaded
-    if (!savedStrength) saveSetting(KEYS.LORA_STRENGTH, initialStrength.toString());
-    // ---> END Load LoRA Selection and Strength <---
-
-    // --- Load Seed State ---
-    const keepSeedCheckbox = UIElements.getKeepSeedCheckboxElement();
-    const seedInput = UIElements.getSeedInputElement();
-
-    if (keepSeedCheckbox && seedInput) {
-        // Restore checkbox state first
-        const savedKeepSeedPref = localStorage.getItem(KEYS.KEEP_SEED_PREF);
-        if (savedKeepSeedPref !== null) {
-            keepSeedCheckbox.checked = savedKeepSeedPref === 'true';
-        } else {
-            // Default to unchecked if never saved
-            keepSeedCheckbox.checked = false;
-            saveSetting(KEYS.KEEP_SEED_PREF, 'false');
-        }
-
-        // Now handle the seed value based on the checkbox state
-        if (keepSeedCheckbox.checked) {
-            const savedSeedValue = localStorage.getItem(KEYS.SAVED_SEED);
-            if (savedSeedValue && !isNaN(parseInt(savedSeedValue))) {
-                seedInput.value = savedSeedValue;
-                // CRITICAL: Update the internal seed state in SeedManagement
-                SeedManagement.setSeed(parseInt(savedSeedValue, 10)); // Use a dedicated setter
-                console.log(`  Restored Saved Seed: ${savedSeedValue} (Keep Seed is ON)`);
-            } else {
-                // Keep seed is ON, but no valid seed saved: Use initial random, display it, and save it.
-                SeedManagement.updateSeedDisplay(); // Updates input & span from internal state
-                saveSetting(KEYS.SAVED_SEED, SeedManagement.getCurrentSeedValue());
-                 console.log(`  Keep Seed ON, but no valid saved seed. Using and saving current: ${SeedManagement.getCurrentSeedValue()}`);
-            }
-        } else {
-            // Keep seed is OFF: Display the current internal (random) seed.
-            SeedManagement.updateSeedDisplay();
-            // Optionally clear the localStorage saved seed if keep seed is off?
-            // localStorage.removeItem(KEYS.SAVED_SEED);
-            console.log("  Keep Seed is OFF. UI reflects current internal seed.");
-        }
-    }
-
-    console.log("💾 [Settings Manager] Finished loading initial settings.");
+    return loadAllSettings();
 }
 
 /**
- * Saves a specific setting to localStorage.
- * @param {string} key - The localStorage key (use KEYS object).
- * @param {string | number | boolean} value - The value to save. Booleans are saved as 'true'/'false'.
+ * Saves the current prompt to localStorage
  */
-export function saveSetting(key, value) {
-    try {
-        let valueToStore = value;
-        if (typeof value === 'boolean') {
-            valueToStore = value ? 'true' : 'false';
-        }
-        localStorage.setItem(key, valueToStore);
-        // console.log(`💾 [Settings Manager] Saved ${key} = ${valueToStore}`); // Verbose log
-    } catch (error) {
-        console.error(`⚠️ [Settings Manager] Error saving setting ${key}:`, error);
-    }
+export function savePrompt(prompt) {
+    localStorage.setItem(STORAGE_KEYS.LAST_PROMPT, prompt);
 }
 
-// --- Specific Save Handlers (Optional but can be convenient) ---
-
-export function savePrompt(promptText) {
-    saveSetting(KEYS.LAST_PROMPT, promptText);
-}
-
-export function saveDimensions(width, height) {
-    saveSetting(KEYS.IMAGE_WIDTH, width);
-    saveSetting(KEYS.IMAGE_HEIGHT, height);
-}
-
-export function saveSteps(steps) {
-    saveSetting(KEYS.STEPS, steps);
-}
-
-export function saveLoraPreference(isEnabled) {
-    saveSetting(KEYS.ENABLE_LORA, isEnabled); // Pass boolean, saveSetting handles conversion
-}
-
-// ---> ADD NEW LORA Save Handlers <---
-export function saveSelectedLora(loraName) {
-    saveSetting(KEYS.SELECTED_LORA, loraName);
-}
-
-export function saveLoraStrength(strength) {
-    // Ensure strength is saved as a string representation of a number
-    const strengthValue = typeof strength === 'number' ? strength.toString() : strength;
-    saveSetting(KEYS.LORA_STRENGTH, strengthValue);
-}
-// ---> END NEW LORA Save Handlers <---
-
-export function saveKeepSeedPreference(isChecked) {
-    saveSetting(KEYS.KEEP_SEED_PREF, isChecked); // Pass boolean
-}
-
-export function saveCurrentSeedValue(seedValue) {
-     saveSetting(KEYS.SAVED_SEED, seedValue);
-}
-
-export function saveDenoiseStrength(value) {
-    saveSetting(KEYS.DENOISE_STRENGTH, value);
-}
-
-export function saveGenerationMode(mode) {
-    saveSetting(KEYS.GENERATION_MODE, mode);
-}
-
-export function removeSavedSeedValue() {
-    localStorage.removeItem(KEYS.SAVED_SEED);
-    console.log(`💾 [Settings Manager] Removed ${KEYS.SAVED_SEED}`);
-}
-
-// Expose KEYS if needed by other modules (though preferably use save functions)
-export { KEYS };
+// Export the STORAGE_KEYS object for use in other modules
+export { STORAGE_KEYS };

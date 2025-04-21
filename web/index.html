@@ -25,92 +25,73 @@
               <textarea id="prompt" class="prompt__textarea" placeholder="Describe your image..." aria-label="Image prompt"></textarea>
               <button id="clear-prompt-button" class="btn btn--secondary btn--clear-prompt" aria-label="Clear prompt text">Clear</button>
           </div>
-          <fieldset class="settings" id="image-settings">
-              <legend class="visually-hidden">Image Generation Settings</legend>
-              <div class="settings__group settings__group--inline">
-                  <label class="settings__label">Mode:</label>
-                  <div class="settings__radio-group">
-                      <input type="radio" id="mode-txt2img" name="generation-mode" value="txt2img" checked>
-                      <label for="mode-txt2img">Text-to-Image</label>
-                  </div>
-                  <div class="settings__radio-group">
-                      <input type="radio" id="mode-img2img" name="generation-mode" value="img2img">
-                      <label for="mode-img2img">Image-to-Image</label>
-                  </div>
-              </div>
-              <div id="img2img-controls" style="display: none;">
+          <button id="send-prompt-button" class="btn btn--primary btn--full">Generate</button>
+          <progress id="main-progress" class="progress" value="0" max="100" aria-label="Generation Progress"></progress>
+          <details class="advanced-settings">
+              <summary class="advanced-settings__summary">Advanced</summary>
+              <fieldset class="settings" id="image-settings">
+                  <legend class="visually-hidden">Image Generation Settings</legend>
                   <div class="settings__group">
-                      <label for="image-upload-input" class="settings__label">Upload Image</label>
-                      <input type="file" id="image-upload-input" accept="image/*" class="settings__input">
-                      <span id="uploaded-filename" class="settings__filename">No image uploaded</span>
+                      <label for="image-size-preset" class="settings__label">Preset</label>
+                      <select id="image-size-preset" class="settings__select" aria-label="Image size preset">
+                          <option value="">Custom</option>
+                          <option value="512x512">512x512</option>
+                          <option value="576x1024">576x1024 (Portrait)</option>
+                          <option value="768x768">768x768</option>
+                          <option value="768x1344">768x1344 (Portrait)</option>
+                          <option value="1024x1024">1024x1024</option>
+                          <option value="1024x576">1024x576 (Landscape)</option>
+                          <option value="1344x768">1344x768 (Landscape)</option>
+                      </select>
                   </div>
-                  <div class="settings__group">
-                      <label for="denoise-strength" class="settings__label">Denoise Strength</label>
-                      <input type="number" id="denoise-strength" class="settings__input" min="0.0" max="1.0" step="0.05" value="0.75" aria-label="Denoise strength">
+                  <div class="settings__group settings__group--inline">
+                      <div class="settings__subgroup">
+                          <label for="image-width" class="settings__label">Width</label>
+                          <input type="number" id="image-width" class="settings__input" value="576" min="64" max="2048" step="64" aria-label="Image width in pixels" />
+                      </div>
+                      <div class="settings__subgroup">
+                          <label for="image-height" class="settings__label">Height</label>
+                          <input type="number" id="image-height" class="settings__input" value="1024" min="64" max="2048" step="64" aria-label="Image height in pixels" />
+                      </div>
                   </div>
-              </div>
-              <div class="settings__group">
-                  <label for="image-size-preset" class="settings__label">Preset</label>
-                  <select id="image-size-preset" class="settings__select" aria-label="Image size preset">
-                      <option value="">Custom</option>
-                      <option value="512x512">512x512</option>
-                      <option value="576x1024">576x1024 (Portrait)</option>
-                      <option value="768x768">768x768</option>
-                      <option value="768x1344">768x1344 (Portrait)</option>
-                      <option value="1024x1024">1024x1024</option>
-                      <option value="1024x576">1024x576 (Landscape)</option>
-                      <option value="1344x768">1344x768 (Landscape)</option>
-                  </select>
-              </div>
-              <div class="settings__group settings__group--inline">
-                  <div class="settings__subgroup">
-                      <label for="image-width" class="settings__label">Width</label>
-                      <input type="number" id="image-width" class="settings__input" value="576" min="64" max="2048" step="64" aria-label="Image width in pixels" />
+                  <div class="settings__group settings__group--inline">
+                      <div class="settings__subgroup">
+                          <label for="steps" class="settings__label">Steps</label>
+                          <input type="number" id="steps" class="settings__input" value="8" min="1" max="150" step="1" aria-label="Number of generation steps" />
+                      </div>
+                      <div class="settings__group settings__group--checkbox">
+                          <input type="checkbox" id="enable-lora" class="settings__checkbox" checked />
+                          <label for="enable-lora" class="settings__label">Use LoRA</label>
+                      </div>
                   </div>
-                  <div class="settings__subgroup">
-                      <label for="image-height" class="settings__label">Height</label>
-                      <input type="number" id="image-height" class="settings__input" value="1024" min="64" max="2048" step="64" aria-label="Image height in pixels" />
-                  </div>
-              </div>
-              <div class="settings__group settings__group--inline">
-                  <div class="settings__subgroup">
-                      <label for="steps" class="settings__label">Steps</label>
-                      <input type="number" id="steps" class="settings__input" value="8" min="1" max="150" step="1" aria-label="Number of generation steps" />
-                  </div>
-                  <div class="settings__group settings__group--checkbox">
-                      <input type="checkbox" id="enable-lora" class="settings__checkbox" checked />
-                      <label for="enable-lora" class="settings__label">Use LoRA</label>
-                  </div>
-              </div>
-              <div class="settings__group settings__group--inline">
-                <div class="settings__subgroup" style="flex-grow: 2;"> <label for="lora-select" class="settings__label">LoRA Model</label>
-                    <select id="lora-select" class="settings__select" aria-label="Select LoRA Model">
-                        <option value="">-- Select LoRA --</option>
-                        </select>
-                </div>
-                <div class="settings__subgroup" style="flex-grow: 1;">
-                    <label for="lora-strength" class="settings__label">LoRA Strength</label>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="range" id="lora-strength" class="settings__slider" min="0" max="1" step="0.05" value="0.8" aria-label="LoRA strength" style="flex-grow: 1;">
-                        <span id="lora-strength-value" style="min-width: 3em; text-align: right;">0.80</span>
+                  <div class="settings__group settings__group--inline">
+                    <div class="settings__subgroup" style="flex-grow: 2;"> <label for="lora-select" class="settings__label">LoRA Model</label>
+                        <select id="lora-select" class="settings__select" aria-label="Select LoRA Model">
+                            <option value="">-- Select LoRA --</option>
+                            </select>
+                    </div>
+                    <div class="settings__subgroup" style="flex-grow: 1;">
+                        <label for="lora-strength" class="settings__label">LoRA Strength</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="range" id="lora-strength" class="settings__slider" min="0" max="1" step="0.05" value="0.8" aria-label="LoRA strength" style="flex-grow: 1;">
+                            <span id="lora-strength-value" style="min-width: 3em; text-align: right;">0.80</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-              <div class="settings__group settings__group--inline">
-                  <div class="settings__group settings__group--checkbox">
-                      <input type="checkbox" id="keep-seed" class="settings__checkbox" />
-                      <label for="keep-seed" class="settings__label">Keep Seed</label>
+                  <div class="settings__group settings__group--inline">
+                      <div class="settings__group settings__group--checkbox">
+                          <input type="checkbox" id="keep-seed" class="settings__checkbox" />
+                          <label for="keep-seed" class="settings__label">Keep Seed</label>
+                      </div>
+                      <!-- Added ID for easier access -->
+                      <span id="current-seed" class="settings__seed" aria-live="polite">Seed: 0</span>
                   </div>
-                  <!-- Added ID for easier access -->
-                  <span id="current-seed" class="settings__seed" aria-live="polite">Seed: 0</span>
-              </div>
-              <div class="settings__group">
-                  <label for="seed-input" class="settings__label">Custom Seed</label>
-                  <input type="number" id="seed-input" class="settings__input" placeholder="Random if Keep Seed is off" aria-label="Custom seed value" />
-              </div>
-          </fieldset>
-          <button id="send-prompt-button" class="btn btn--primary btn--full">Generate Image</button>
-          <progress id="main-progress" class="progress" value="0" max="100" aria-label="Generation Progress"></progress>
+                  <div class="settings__group">
+                      <label for="seed-input" class="settings__label">Custom Seed</label>
+                      <input type="number" id="seed-input" class="settings__input" placeholder="Random if Keep Seed is off" aria-label="Custom seed value" />
+                  </div>
+              </fieldset>
+          </details>
       </section>
 
       <!-- Image Display Card -->
@@ -123,17 +104,40 @@
         </div>
       </section>
 
+      <!-- Input Image Section -->
+      <details class="input-image-toggle">
+        <summary class="input-image-toggle__summary">Input Image</summary>
+        <div class="card card--input-image">
+          <div class="settings__group">
+              <label for="image-upload-input" class="settings__label">Upload Image</label>
+              <input type="file" id="image-upload-input" accept="image/*" class="settings__input">
+              <span id="uploaded-filename" class="settings__filename">No image uploaded</span>
+          </div>
+          <div class="settings__group settings__group--denoise">
+              <label class="settings__label">Variation Strength</label>
+              <div class="denoise-controls">
+                  <button id="vary-subtle-button" class="btn btn--secondary">Vary (Subtle)</button>
+                  <button id="vary-strong-button" class="btn btn--secondary">Vary (Strong)</button>
+                  <input type="number" id="denoise-strength-manual" class="settings__input denoise-input--manual" min="0.0" max="1.0" step="0.01" value="0.85" aria-label="Manual denoise strength">
+              </div>
+          </div>
+        </div>
+      </details>
+
       <!-- Prompt History Section -->
-      <section id="prompt-history" class="history fade-in" aria-labelledby="history-heading">
-        <h3 class="history__title">Recent Prompts</h3>
-        <ul id="recent-prompts-list" class="history__list" aria-label="List of recent prompts">
-             <li class="empty-message">Loading...</li>
-        </ul>
-        <h3 class="history__title">Favorite Prompts</h3>
-        <ul id="favorite-prompts-list" class="history__list" aria-label="List of favorite prompts">
-             <li class="empty-message">Loading...</li>
-        </ul>
-      </section>
+      <details class="history-toggle">
+          <summary class="history-toggle__summary">Prompt History</summary>
+          <section id="prompt-history" class="history fade-in" aria-labelledby="history-heading">
+            <h3 class="history__title">Recent Prompts</h3>
+            <ul id="recent-prompts-list" class="history__list" aria-label="List of recent prompts">
+                 <li class="empty-message">Loading...</li>
+            </ul>
+            <h3 class="history__title">Favorite Prompts</h3>
+            <ul id="favorite-prompts-list" class="history__list" aria-label="List of favorite prompts">
+                 <li class="empty-message">Loading...</li>
+            </ul>
+          </section>
+      </details>
 
     </div> <!-- End .container -->
   </main> <!-- End .main -->

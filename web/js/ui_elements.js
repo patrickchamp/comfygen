@@ -35,13 +35,12 @@ export function initializeUIElements() {
         seedInput: 'seed-input',
         currentSeedDisplaySpan: 'current-seed', // Added from seed_management needs
         
-        // Img2Img Controls
-        modeTxt2imgRadio: 'mode-txt2img',
-        modeImg2imgRadio: 'mode-img2img',
+        // Image Upload Controls
         imageUploadInput: 'image-upload-input',
-        denoiseStrengthInput: 'denoise-strength',
-        img2imgControls: 'img2img-controls',
         uploadedFilenameSpan: 'uploaded-filename',
+        varySubtleButton: 'vary-subtle-button',
+        varyStrongButton: 'vary-strong-button',
+        denoiseStrengthManualInput: 'denoise-strength-manual',
 
         // Progress
         progressBar: 'main-progress',
@@ -102,13 +101,12 @@ export const getKeepSeedCheckboxElement = () => elements.keepSeedCheckbox;
 export const getSeedInputElement = () => elements.seedInput;
 export const getCurrentSeedDisplaySpanElement = () => elements.currentSeedDisplaySpan; // Added getter
 
-// Img2Img Controls
-export const getModeTxt2imgRadioElement = () => elements.modeTxt2imgRadio;
-export const getModeImg2imgRadioElement = () => elements.modeImg2imgRadio;
+// Image Upload Controls
 export const getImageUploadInputElement = () => elements.imageUploadInput;
-export const getDenoiseStrengthElement = () => elements.denoiseStrengthInput;
-export const getImg2imgControlsElement = () => elements.img2imgControls;
 export const getUploadedFilenameSpanElement = () => elements.uploadedFilenameSpan;
+export const getVarySubtleButtonElement = () => elements.varySubtleButton;
+export const getVaryStrongButtonElement = () => elements.varyStrongButton;
+export const getDenoiseStrengthManualInputElement = () => elements.denoiseStrengthManualInput;
 
 // Progress
 export const getProgressBarElement = () => elements.progressBar;

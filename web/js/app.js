@@ -123,10 +123,6 @@ async function queuePromptWithText(text) {
     PromptManagement.addToRecentPrompts(text);
     // SettingsManager.savePrompt(text); // Handled by event listener in app_init
 
-    // --- Get Generation Mode ---
-    const generationMode = document.querySelector('input[name="generation-mode"]:checked').value;
-    console.log(`  🔄 Generation Mode: ${generationMode}`);
-
     // ---> Get LoRA Settings from UI <---
     const loraSelectElement = UIElements.getLoraSelectElement();
     const loraStrengthElement = UIElements.getLoraStrengthElement();
@@ -158,23 +154,40 @@ async function queuePromptWithText(text) {
     // --- Create Deep Copy of Appropriate Workflow ---
     let freshWorkflow;
     let nodeIds;
-    
+    let isImg2Img = !!window.uploadedImageFilename; // Check if an image filename exists
+
+    console.log(`  🔄 Workflow Mode: ${isImg2Img ? 'Image-to-Image' : 'Text-to-Image'}`);
+
     try {
-        if (generationMode === 'img2img') {
-            // Check if an image is uploaded
-            if (!window.uploadedImageFilename) {
-                alert('Please upload an image first for img2img generation.');
-                return;
-            }
-            
+        if (isImg2Img) {
+            // --- Image-to-Image Workflow Setup ---
             if (!img2imgWorkflow) {
-                alert('Img2img workflow not loaded. Please refresh the page or check console.');
-                return;
+                 alert('Img2img workflow data is missing. Please ensure Flux_img2img.json is loaded.');
+                 console.error("🚨 Cannot run img2img: workflow data not loaded.");
+                 return; // Stop if workflow isn't available
             }
-            
             freshWorkflow = JSON.parse(JSON.stringify(img2imgWorkflow));
-            nodeIds = IMG2IMG_NODE_IDS;
+            nodeIds = IMG2IMG_NODE_IDS; // Use the existing IMG2IMG constants
             console.log("  🧬 Created deep copy of img2img workflow template.");
+
+            // Set the uploaded image filename (already done in original img2img block, keep)
+            if (freshWorkflow[nodeIds.LOAD_IMAGE]?.inputs) {
+                freshWorkflow[nodeIds.LOAD_IMAGE].inputs.image = window.uploadedImageFilename;
+                console.log(`  🖼️ Set input image: ${window.uploadedImageFilename}`);
+            } else {
+                 console.warn(`Node ${nodeIds.LOAD_IMAGE} (Load Image) not found or missing inputs.`);
+                 // Consider if this should be a fatal error for img2img
+            }
+
+            // Set denoise strength using the *new* input ID
+            const denoiseInput = UIElements.getDenoiseStrengthManualInputElement(); // <-- Use new getter
+            const denoiseValue = denoiseInput ? parseFloat(denoiseInput.value) : 0.5; // Default if missing
+            if (freshWorkflow[nodeIds.KSAMPLER]?.inputs) {
+                 freshWorkflow[nodeIds.KSAMPLER].inputs.denoise = denoiseValue;
+                 console.log(`  🎨 Set denoise strength: ${denoiseValue}`);
+            } else {
+                 console.warn(`Node ${nodeIds.KSAMPLER} (KSampler) not found or missing 'denoise' input.`);
+            }
         } else {
             freshWorkflow = JSON.parse(JSON.stringify(txt2imgWorkflow));
             nodeIds = TXT2IMG_NODE_IDS;
@@ -191,20 +204,7 @@ async function queuePromptWithText(text) {
     console.log(`  🌱 Using Seed: ${seedForThisRun}`);
 
     try {
-        if (generationMode === 'img2img') {
-            // Set the uploaded image filename
-            if (freshWorkflow[nodeIds.LOAD_IMAGE]?.inputs) {
-                freshWorkflow[nodeIds.LOAD_IMAGE].inputs.image = window.uploadedImageFilename;
-                console.log(`  🖼️ Set input image: ${window.uploadedImageFilename}`);
-            }
-            
-            // Set denoise strength
-            const denoiseValue = UIElements.getDenoiseStrengthElement().value;
-            if (freshWorkflow[nodeIds.KSAMPLER]?.inputs) {
-                freshWorkflow[nodeIds.KSAMPLER].inputs.denoise = parseFloat(denoiseValue);
-                console.log(`  🎨 Set denoise strength: ${denoiseValue}`);
-            }
-            
+        if (isImg2Img) {
             // Set prompt text
             if (freshWorkflow[nodeIds.POSITIVE_PROMPT_ENCODER]?.inputs) {
                 freshWorkflow[nodeIds.POSITIVE_PROMPT_ENCODER].inputs.clip_l = text.replace(/(\r\n|\n|\r)/gm, ' ');

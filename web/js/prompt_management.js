@@ -9,7 +9,7 @@
 // ==========================================================================
 
 import { updatePromptListsUI } from './ui_history.js'; // Specific UI update function
-import { KEYS as StorageKeys, saveSetting } from './settings_manager.js'; // For saving last prompt
+import { STORAGE_KEYS } from './settings_manager.js'; // For saving last prompt
 
 // ==========================================================================
 // Module Variables
@@ -101,7 +101,7 @@ function savePromptsToStorage() {
 
 /** Clears the 'lastPrompt' item from localStorage. Called by app.js. */
 export function clearLastPromptStorage() {
-    localStorage.removeItem(StorageKeys.LAST_PROMPT); // Use key from SettingsManager
+    localStorage.removeItem(STORAGE_KEYS.LAST_PROMPT); // Use key from SettingsManager
     console.log("🧹 [Prompt Management] Cleared last prompt from storage.");
 }
 
