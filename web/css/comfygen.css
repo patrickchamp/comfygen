@@ -216,9 +216,8 @@ body {
 
 /* Specific styling for the smaller 'Clear' button */
 .btn--clear-prompt {
-  padding: 0.5rem 1rem; /* Smaller padding */
-  font-size: 0.85rem;
-  min-height: auto; /* Allow smaller height */
+  padding: 0.65rem 1.25rem; /* Match base .btn padding */
+  font-size: 0.95rem; /* Match base .btn font-size */
   margin-left: var(--spacing-sm); /* Space from textarea */
   flex-shrink: 0; /* Prevent shrinking if container is tight */
 }
@@ -261,7 +260,6 @@ body {
 .prompt__actions {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   flex-shrink: 0;
   margin-left: var(--spacing-md);
 }
